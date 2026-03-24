@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: Anleitung zum Erstellen und Paketieren von Claude Code Skills. Verwenden wenn der Nutzer einen neuen Skill erstellen, einen bestehenden Skill aktualisieren oder einen Skill zur Weitergabe paketieren moechte. Ausloeser sind Anfragen wie "erstelle einen Skill", "baue einen Skill", "neuer Skill fuer X", "Skill paketieren".
-version: 1.0.0
+version: 1.0.1
 ---
 
 # Skill Creator
