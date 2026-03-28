@@ -222,6 +222,110 @@ CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 
 ---
 
+## .eslintrc.js (Code Quality Gate)
+
+Die Haupt-Regeldatei fuer ESLint. Wird vom `/implement` Skill als Quality Gate in
+Schritt 6a automatisch ausgefuehrt. SonarLint liest diese Regeln ebenfalls.
+
+```javascript
+// .eslintrc.js
+// Wird von /implement Schritt 6a ausgefuehrt: npx eslint --max-warnings=0
+// SonarQube for IDE (SonarLint) und Error Lens zeigen Findings inline in VS Code
+'use strict';
+
+module.exports = {
+  env: {
+    node: true,
+    es2022: true,
+  },
+  extends: ['eslint:recommended'],
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
+  },
+  rules: {
+
+    // === FEHLER-PRAEVENTION ===
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    'no-undef': 'error',
+    'no-unreachable': 'error',
+    'no-duplicate-case': 'error',
+
+    // === SICHERHEIT (Security by Design) ===
+    'no-eval': 'error',            // Kein eval() — Remote Code Execution Risiko
+    'no-implied-eval': 'error',    // Kein setTimeout('string') — gleiches Risiko
+    'no-new-func': 'error',        // Kein new Function() — gleiches Risiko
+    'no-script-url': 'error',      // Kein javascript: in URLs
+
+    // === CODE-QUALITAET ===
+    'eqeqeq': ['error', 'always'], // Immer === statt ==
+    'no-var': 'error',             // Kein var — nur let/const
+    'prefer-const': 'error',       // const wo moeglich
+    'no-console': 'warn',          // console.log bewusst einsetzen
+
+    // === GOVERNANCE ===
+    'semi': ['error', 'always'],   // Semikolon Pflicht
+    'quotes': ['warn', 'single', { avoidEscape: true }],
+    'no-trailing-spaces': 'warn',
+    'eol-last': ['warn', 'always'],
+
+  },
+  ignorePatterns: [
+    'node_modules/',
+    'journal/',
+    'data/',
+    'signals/',
+    '*.min.js',
+  ],
+};
+```
+
+**Warum diese Regeln?**
+
+| Regel | Schutzziel |
+|-------|-----------|
+| `no-eval` | Verhindert Code-Injection (OWASP Top 10) |
+| `eqeqeq` | Verhindert subtile Typ-Vergleichsfehler |
+| `no-unused-vars` | Verhindert toten Code der versteckte Bugs kaschiert |
+| `prefer-const` | Verhindert unbeabsichtigte Variable-Mutation |
+
+---
+
+## sonar-project.properties (SonarLint Konfiguration)
+
+Konfiguriert SonarQube for IDE (SonarLint Plugin in VS Code) fuer das Projekt.
+SonarLint zeigt tiefergehende Security- und Quality-Issues direkt im Editor.
+
+```properties
+# sonar-project.properties
+# SonarQube for IDE (SonarLint) liest diese Datei automatisch
+
+sonar.projectKey={{PROJECT_SLUG}}-project
+sonar.projectName={{PROJECT_NAME}}
+sonar.projectVersion={{VERSION_START}}
+
+# Quellcode-Verzeichnisse
+sonar.sources=.
+sonar.sourceEncoding=UTF-8
+
+# Ausschlüsse — diese Verzeichnisse nicht analysieren
+sonar.exclusions=\
+  node_modules/**,\
+  journal/**,\
+  data/**,\
+  signals/**,\
+  *.min.js,\
+  .claude/**
+
+# JavaScript/Node.js Einstellungen
+sonar.javascript.environments=node
+
+# Test-Verzeichnisse (falls vorhanden)
+# sonar.tests=tests/
+```
+
+---
+
 ## API_INVENTORY.md (Minimum)
 
 ```markdown

@@ -635,27 +635,55 @@ Die offizielle Claude Code Extension für VS Code integriert alles direkt in dei
 VS Code → Extensions → "Claude Code" suchen → Install
 ```
 
-### Empfohlene Plugins für Governance
+### Die 3 Governance-Plugins
 
-Diese 3 Plugins ergänzen das Governance-Framework perfekt:
+Diese 3 Plugins bilden zusammen eine **automatische Code-Qualitäts-Schicht** die dich
+beim Schreiben schlechten Codes bremst — bevor es zu einem Problem wird.
 
-> **Hinweis:** Die konkreten 3 Plugins werden hier ergänzt — bitte bestätigen.
-> In der Zwischenzeit: Diese Empfehlungen funktionieren gut mit dem Framework:
+**1. ESLint** — Coding-Regeln in Echtzeit
 
-**1. GitLens** — Macht Governance sichtbar
+- Prüft deinen Code automatisch gegen die Regeln in `.eslintrc.js`
+- Zeigt Fehler und Warnungen direkt im Editor (rote/gelbe Unterkringelung)
+- Schützt gegen echte Fehlerquellen: unbenutzte Variablen, fehlendes `===`, Security-Lücken
+- **Verbindung zur Governance:** Der `/implement` Skill ruft ESLint nach jeder Änderung
+  automatisch auf (`npx eslint --max-warnings=0`) — Fehler blockieren den Commit
 
-- Zeigt für jede Codezeile: wer hat das wann geändert und mit welchem Commit
-- Commit-History direkt im Editor
-- Zeigt welches Linear-Issue hinter einem Commit steckt (wenn Commit-Messages stimmen)
-- Macht den Audit-Trail lebendig
+**2. SonarQube for IDE** (SonarLint) — Tiefenanalyse
 
-**2. Error Lens** — Fehler sofort sehen
+- Analysiert tiefergehende Muster: Code Smells, potenzielle Bugs, Security Vulnerabilities
+- Arbeitet passiv im Hintergrund — kein manuelles Starten
+- Kategorisiert Findings nach Schweregrad (Bug / Vulnerability / Code Smell)
+- Liest optional `sonar-project.properties` für projektspezifische Regeln
+- **Verbindung zur Governance:** Findet was ESLint nicht findet — z.B. SQL Injection Muster,
+  hardcoded Credentials, unsichere Crypto-Nutzung
 
-- Zeigt Linting-Fehler und Warnungen direkt in der Zeile (nicht erst beim Speichern)
-- Governance für Code-Qualität: Du siehst sofort wenn etwas nicht stimmt
-- Kein "geht schon irgendwie" — Fehler werden sichtbar gemacht
+**3. Error Lens** — Kein Verstecken mehr
 
-**3. [Dein drittes Plugin]** — Wird ergänzt
+- Zeigt ESLint- und SonarLint-Findings **direkt in der Zeile** — nicht erst beim Hover
+- Rote Zeile = Fehler. Gelbe Zeile = Warnung. Sofort sichtbar, nicht ignorierbar.
+- **Verbindung zur Governance:** Macht das Qualitäts-Feedback unmittelbar — du siehst
+  Probleme während du tippst, nicht erst wenn `/implement` den Gate ausführt
+
+**Das Zusammenspiel:**
+```
+Du tippst Code
+  → Error Lens zeigt ESLint + SonarLint Findings inline (sofort)
+  → Du fixst während du schreibst
+
+/implement wird ausgeführt
+  → ESLint CLI läuft automatisch: npx eslint --max-warnings=0
+  → 0 Errors = Gate bestanden → weiter
+  → Errors vorhanden = Gate blockiert → erst fixen
+```
+
+**Die Regeldatei: `.eslintrc.js`**
+
+Der Bootstrap legt diese Datei automatisch an. Sie enthält:
+- Security-Regeln: `no-eval`, `no-implied-eval`, `no-new-func`
+- Qualitäts-Regeln: `eqeqeq`, `no-unused-vars`, `prefer-const`
+- Style-Regeln: `semi`, `quotes`, `no-trailing-spaces`
+
+Anpassen: Öffne `.eslintrc.js` und füge/entferne Regeln nach Bedarf.
 
 ### Empfohlene VS Code Settings für Governance
 
