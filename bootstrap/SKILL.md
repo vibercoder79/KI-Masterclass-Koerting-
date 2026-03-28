@@ -41,17 +41,27 @@ b) Frontend (React, Vue, Vanilla JS — laeuft im Browser)
 c) Full-Stack (Node.js Backend + Frontend)
 d) Python (KI/ML, Scripts, FastAPI, Django, Data Science)
 e) Anderes / Noch nicht klar → kurz beschreiben
+f) Webflow (Visual Frontend via Webflow MCP — kein lokales Build-System)
 ```
 
 **Warte auf Antwort.** Die Antwort bestimmt welche Tooling-Dateien Bootstrap anlegt:
 
 | Stack | Linter | Formatter | Config-Dateien |
 |-------|--------|-----------|----------------|
-| a) Node.js/JS | ESLint | — | `eslint.config.mjs`, `sonar-project.properties` |
+| a) Node.js/JS | **Biome** (empfohlen) oder ESLint | **Biome** (inkl.) | `biome.json`, `sonar-project.properties` |
 | b) Frontend | ESLint + Prettier | Prettier | `eslint.config.mjs`, `.prettierrc`, `sonar-project.properties` |
 | c) Full-Stack | ESLint + Prettier | Prettier | `eslint.config.mjs`, `.prettierrc`, `sonar-project.properties` |
 | d) Python | Ruff / Flake8 | Black | `pyproject.toml`, `sonar-project.properties` |
 | e) Anderes | Gemeinsam entscheiden | — | Je nach Sprache |
+| f) Webflow | Biome (nur fuer Custom JS) | Biome (nur fuer Custom JS) | `biome.json` (optional), `.webflow/` |
+
+> **Hinweis Node.js:** Biome ersetzt ESLint + Prettier in einem Tool (Rust-basiert, 10-100x schneller,
+> kein `node_modules` noetig wenn als Binary installiert). Fuer bestehende Projekte mit ESLint:
+> Migration ist optional — ESLint bleibt als Alternative gueltig.
+
+> **Hinweis Webflow:** Primaerer Editor ist Claude Code + Webflow MCP (kein lokales Build-System).
+> Git-Repo enthaelt nur Governance-Dateien + Custom JS/CSS Snippets. Webflow Cloud ist SSoT fuer
+> alles Visuelle. Wenn f) gewaehlt: Schritt 0.2 enthaelt zusaetzliche Webflow-spezifische Fragen.
 
 Speichere die Antwort als `{{STACK}}` fuer Phase 1.
 
@@ -92,6 +102,24 @@ DOMAIN:
 14. Welche Architektur-Dimensionen sind relevant?
     Standard: Reliability, Data Integrity, Security, Performance, Observability, Maintainability
     Optional: Cost Efficiency, Signal Quality, oder eigene?
+```
+
+**Wenn Stack = f) Webflow: zusaetzlichen Block stellen (direkt nach den Pflicht-Fragen):**
+
+```
+WEBFLOW-SPEZIFISCH:
+15. Webflow Site ID?
+    (Webflow Designer → Settings → General → unten: "Site ID")
+16. Welche Bereiche sind relevant?
+    a) Nur statische Seiten / Landing Pages
+    b) CMS (Blog, Produkte, dynamische Inhalte)
+    c) E-Commerce
+    d) Member Areas / Auth (z.B. Memberstack, Outseta)
+    e) Custom Code (eigene JS-Logik via Script Injection)
+    f) Mehrere davon → welche?
+17. Gibt es Custom JS/CSS das lokal entwickelt werden soll?
+    (Wenn ja: Biome + lokales Repo sinnvoll. Wenn nein: nur Governance-Dateien)
+18. Webflow Hosting oder externe Domain?
 ```
 
 Warte auf Antworten. Dann weiter mit Phase 1.
@@ -150,11 +178,30 @@ Aus `references/file-templates.md` mit Operator-Angaben befuellen:
 
 | Stack | Anlegen |
 |-------|---------|
-| a) Node.js/JS | `eslint.config.mjs` (Template: eslint.config.mjs) |
+| a) Node.js/JS | `biome.json` (Template: biome.json) — empfohlen. Alternativ: `eslint.config.mjs` |
 | b) Frontend | `eslint.config.mjs` + `.prettierrc` (Template: .prettierrc) |
 | c) Full-Stack | `eslint.config.mjs` + `.prettierrc` (Template: .prettierrc) |
 | d) Python | `pyproject.toml` (Template: pyproject.toml) — kein ESLint |
 | e) Anderes | Gemeinsam mit Operator entscheiden |
+| f) Webflow | `.webflow/config.json` (Webflow Site Config) + `biome.json` wenn Custom JS (Frage 17) |
+
+**Wenn f) Webflow: zusaetzlich anlegen:**
+- `.webflow/config.json` — Webflow Site ID + Bereich-Config (aus Antworten 15-18)
+- `custom-code/` — Verzeichnis fuer Custom JS/CSS Snippets (nur wenn Frage 17 = Ja)
+- `.gitignore` anpassen: Webflow-Export-Ordner ausschliessen wenn relevant
+- `WEBFLOW_WORKFLOW.md` — Kurz-Doku des MCP-Workflows fuer dieses Projekt
+
+**Webflow Dev-Chain dem Operator erklaeren (nur bei f)):**
+```
+Workflow fuer dieses Projekt:
+  Claude Code + Webflow MCP → Webflow Cloud (SSoT fuer visuellen Content)
+  Git-Repo → enthaelt: Governance + Custom JS/CSS + Webflow-Config
+  Kein lokales Build-System, kein npm fuer Webflow-Content
+
+  Fuer Custom JS (wenn vorhanden):
+    Mac lokal → VS Code + Biome → git commit → GitHub
+    Claude liest JS und injiziert via data_scripts_tool in Webflow
+```
 
 Dem Operator nach Abschluss mitteilen welche Tooling-Dateien angelegt wurden und
 welche VS Code Extensions dazu passen (aus `references/file-templates.md` Sektion

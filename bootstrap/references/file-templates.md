@@ -332,6 +332,93 @@ alle Regeln sind generisch und funktionieren fuer jedes Node.js Projekt ohne Anp
 
 ---
 
+## biome.json (Node.js — Linter + Formatter in einem)
+
+Nur anlegen wenn Stack = a) Node.js/JS und Operator Biome gewaehlt hat.
+Biome ersetzt ESLint + Prettier in einer einzigen Rust-Binary — kein `node_modules` noetig.
+97% Prettier-kompatible Formatierung + ESLint-aequivalente Linting-Regeln.
+
+**Installation (einmalig, als dev-binary):**
+```bash
+npm install --save-dev --save-exact @biomejs/biome
+# oder als globales Binary (kein node_modules im Projekt):
+npm install -g @biomejs/biome
+```
+
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "security": {
+        "noEval": "error"
+      },
+      "suspicious": {
+        "noConsoleLog": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "es5",
+      "semicolons": "always"
+    }
+  },
+  "files": {
+    "ignore": [
+      "node_modules",
+      "data",
+      "signals",
+      "journal",
+      "*.min.js"
+    ]
+  }
+}
+```
+
+**VS Code Setting ergaenzen** (in `.vscode/settings.json`):
+```json
+{
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit"
+  },
+  "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[json]": { "editor.defaultFormatter": "biomejs.biome" }
+}
+```
+
+**Warum Biome statt ESLint fuer Node.js?**
+
+| Kriterium | ESLint | Biome |
+|-----------|--------|-------|
+| Speed | ~2-5s | ~100ms (Rust) |
+| Tools | Linter only | Linter + Formatter |
+| Konfiguration | `.eslintrc` + `.prettierrc` | 1 Datei (`biome.json`) |
+| npm-Deps | `eslint` + Plugins | 1 Binary (`@biomejs/biome`) |
+| Prettier-Kompatibel | via Plugin | 97% nativ |
+
+> **Fuer bestehende Projekte mit ESLint:** Migration ist optional — ESLint bleibt gueltig.
+> Biome empfohlen fuer alle **neuen** Node.js-Projekte.
+
+---
+
 ## .prettierrc (Formatter — Frontend / Full-Stack)
 
 Nur anlegen wenn Stack = b) Frontend oder c) Full-Stack.
@@ -454,8 +541,15 @@ Einfach anklicken → direkt im Browser installieren.
 ```
 ✓ Stack-spezifisch (Node.js):
 
+→ Biome (Linter + Formatter in einem — empfohlen fuer neue Projekte)
+  https://marketplace.visualstudio.com/items?itemName=biomejs.biome
+  [Ersetzt ESLint + Prettier, 97% Prettier-kompatibel, Rust-based = sehr schnell]
+
 → REST Client (API-Endpunkte direkt aus VS Code testen)
   https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+Hinweis: Wenn Biome verwendet wird, kein ESLint-Plugin noetig.
+Wenn ESLint bevorzugt wird (bestehendes Projekt): ESLint aus Basis-Extensions reicht.
 ```
 
 ### Stack b) Frontend — zusaetzlich ausgeben
@@ -480,6 +574,35 @@ Einfach anklicken → direkt im Browser installieren.
 
 → Prettier (automatisches Formatieren beim Speichern)
   https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
+```
+
+### Stack f) Webflow — zusaetzlich ausgeben
+
+```
+✓ Stack-spezifisch (Webflow + MCP):
+
+→ Webflow hat kein lokales VS Code Plugin — Entwicklung laeuft via Claude Code + Webflow MCP.
+
+  Workflow:
+  Claude Code → Webflow MCP Tools → Webflow Cloud (SSoT)
+  (kein lokales Build-System, kein npm fuer Webflow-Content)
+
+Wenn Custom JS vorhanden (Frage 17 = Ja):
+
+→ Biome (Linter + Formatter fuer Custom JS)
+  https://marketplace.visualstudio.com/items?itemName=biomejs.biome
+
+→ REST Client (Custom JS via Script Injection testen)
+  https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+Verfuegbare Webflow MCP Tools (bereits registriert):
+  - de_page_tool / de_component_tool  → Seiten + Komponenten
+  - element_tool / element_builder    → DOM-Elemente
+  - style_tool / variable_tool        → CSS + Variablen
+  - data_cms_tool                     → CMS Collections
+  - data_scripts_tool                 → Custom Code Injection
+  - asset_tool                        → Bilder + Assets
+  - ask_webflow_ai                    → Webflow-spezifische KI-Hilfe
 ```
 
 ### Stack d) Python — STATT Basis-Extensions ausgeben
