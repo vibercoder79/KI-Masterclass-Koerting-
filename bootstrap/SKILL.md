@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-version: 1.1.0
+version: 2.0.0
 description: Richtet ein neues Projekt mit dem OpenCLAW Governance Framework ein. Interaktiver Prompt-gefuehrter Prozess in 5 Phasen. Verwenden wenn der Operator ein neues Projekt aufsetzen will oder "/bootstrap" sagt.
 tools: [Read, Write, Edit, Bash, Glob, Grep]
 portable: true
@@ -14,8 +14,9 @@ Interaktiver 5-Phasen-Workflow fuer ein neues Projekt mit OpenCLAW Governance.
 
 Referenzen:
 - `references/info-gathering.md` — Pflicht-Infos vor dem Setup
-- `references/file-templates.md` — config.js, CLAUDE.md, CHANGELOG etc.
-- `references/governance-template.md` — GOVERNANCE.md vollstaendig eingebettet
+- `references/file-templates.md` — config.js, CLAUDE.md, CHANGELOG, API_INVENTORY, INDEX, PROCESS_CATALOG, specs/TEMPLATE etc.
+- `references/governance-template.md` — GOVERNANCE.md vollstaendig eingebettet (inkl. Spec-Driven Dev + ADR)
+- `references/hooks-setup.md` — Git Hook Templates (spec-gate.sh, doc-version-sync.sh)
 - `references/self-healing-template.js` — Self-Healing Agent Starter
 - `references/doc-sync-template.js` — Doc-Sync Module Starter
 - `references/issue-writing-guidelines-template.md` — Issue Writing Guidelines
@@ -52,9 +53,10 @@ OPTIONAL (leer lassen wenn nicht gewuenscht):
 SKILLS:
 13. Welche Skills installieren?
     a) Minimum (ideation, implement, backlog) — empfohlen fuer Start
-    b) Standard (+ architecture-review, sprint-review, research)
-    c) Voll (alle 9 Skills)
+    b) Standard (+ architecture-review, sprint-review, research, breakfix)
+    c) Voll (alle Skills: + cloud-system-engineer, visualize, skill-creator, integration-test, status, calibrate)
     d) Manuell auswaehlen
+    e) Optional-Stack angeben (grafana, supabase, vercel)
 
 DOMAIN:
 14. Welche Architektur-Dimensionen sind relevant?
@@ -77,6 +79,9 @@ mkdir -p {PROJECT_PATH}/lib
 mkdir -p {PROJECT_PATH}/agents
 mkdir -p {PROJECT_PATH}/journal
 mkdir -p {PROJECT_PATH}/specs
+mkdir -p {PROJECT_PATH}/docs
+mkdir -p {PROJECT_PATH}/data
+mkdir -p {PROJECT_PATH}/signals
 mkdir -p {PROJECT_PATH}/.claude/skills
 mkdir -p {PROJECT_PATH}/.claude/hooks
 ```
@@ -103,6 +108,10 @@ Aus `references/file-templates.md` mit Operator-Angaben befuellen:
 | `COMPONENT_INVENTORY.md` | COMPONENT_INVENTORY.md |
 | `.env.example` | .env.example |
 | `CHANGELOG.md` | CHANGELOG.md |
+| `API_INVENTORY.md` | API_INVENTORY.md |
+| `INDEX.md` | INDEX.md |
+| `PROCESS_CATALOG.md` | PROCESS_CATALOG.md |
+| `specs/TEMPLATE.md` | specs-template |
 
 Ausserdem anlegen (aus eingebetteten Templates — **kein cp von externen Pfaden noetig**):
 
@@ -138,6 +147,40 @@ NIEMALS echte Keys im Chat nennen.
 
 Warte auf Bestaetigung "done" bevor weiter.
 
+### 1.4a Git Hooks einrichten (Governance-Enforcement)
+
+Lies `references/hooks-setup.md` fuer die vollstaendigen Hook-Templates.
+
+**spec-gate.sh** — blockiert `git commit ISSUE-XX` wenn kein Spec-File existiert:
+```bash
+cp {bootstrap-path}/references/hooks-setup.md /tmp/_hooks_ref.md
+# Hook aus Template entnehmen und schreiben:
+cat > {PROJECT_PATH}/.claude/hooks/spec-gate.sh << 'EOF'
+# [aus references/hooks-setup.md Sektion spec-gate kopieren]
+EOF
+chmod +x {PROJECT_PATH}/.claude/hooks/spec-gate.sh
+```
+
+**doc-version-sync.sh** — blockiert `git commit` wenn config.js VERSION erhoehen aber Doku-Dateien noch auf alter Version:
+```bash
+cat > {PROJECT_PATH}/.claude/hooks/doc-version-sync.sh << 'EOF'
+# [aus references/hooks-setup.md Sektion doc-version-sync kopieren]
+EOF
+chmod +x {PROJECT_PATH}/.claude/hooks/doc-version-sync.sh
+```
+
+**Hooks in `.claude/settings.json` registrieren:**
+```json
+{
+  "hooks": {
+    "PreToolUse": [],
+    "PostToolUse": []
+  }
+}
+```
+
+Dem Operator mitteilen: "Hooks sind angelegt. Aktivierung via `.claude/settings.json` oder manuell."
+
 ### 1.5 Linear Labels einrichten
 
 Anleiten: In Linear mindestens anlegen: `architecture`, `bug`, `feature`, `refactor`, `docs`, `infra`
@@ -165,7 +208,13 @@ Lies `references/skills-setup.md` fuer Details zu Symlinks vs. Kopie.
 
 Basierend auf Antwort 13 die Skills verlinken oder kopieren.
 
-**Wenn dieser Bootstrap-Skill selbst unter `/root/.claude/skills/` liegt (Standard-Setup auf einer Maschine mit Claude Code):**
+**Schritt 2.1: Pruefen ob Skills lokal vorhanden**
+
+```bash
+ls /root/.claude/skills/ideation 2>/dev/null && echo "LOKAL" || echo "DOWNLOAD"
+```
+
+**Wenn LOKAL (Standard — gleiche Maschine):**
 
 ```bash
 cd {PROJECT_PATH}
@@ -173,19 +222,39 @@ cd {PROJECT_PATH}
 ln -s /root/.claude/skills/{skill-name} .claude/skills/{skill-name}
 ```
 
-**Wenn dieser Skill auf einer anderen Maschine laeuft (portabler Modus):**
+**Wenn DOWNLOAD (neue Maschine — automatisch von GitHub holen):**
 
-Die Skills muessen separat installiert werden. Hinweis an den Operator:
+```bash
+SKILLS_DIR="/root/.claude/skills"
+REPO="https://github.com/vibercoder79/KI-Masterclass-Koerting-.git"
+mkdir -p "$SKILLS_DIR"
+
+# Sparse Clone — nur Skills, kein Trading-System-Code
+cd /tmp
+git clone --filter=blob:none --sparse "$REPO" ki-masterclass-skills 2>/dev/null
+cd ki-masterclass-skills
+
+# Gewaehlte Skills holen (Minimum: ideation implement backlog)
+git sparse-checkout set ideation implement backlog architecture-review sprint-review research skill-creator visualize
+
+# Nach /root/.claude/skills/ kopieren
+cp -r ideation implement backlog architecture-review sprint-review research skill-creator visualize "$SKILLS_DIR/"
+cd /tmp && rm -rf ki-masterclass-skills
+echo "Skills installiert in $SKILLS_DIR"
 ```
-Der Bootstrap-Skill ist portabel — aber die anderen Skills (ideation, implement, etc.)
-sind NICHT in diesem Paket enthalten. Bitte besorge sie separat oder installiere
-das vollstaendige OpenCLAW Skills-Paket von:
-https://github.com/vibercoder79/openclaw_trading
+
+Dann Symlinks ins Projekt setzen:
+```bash
+cd {PROJECT_PATH}
+for SKILL in {gewaehlte-skills}; do
+  ln -s /root/.claude/skills/$SKILL .claude/skills/$SKILL
+done
 ```
 
 Minimum (a): ideation, implement, backlog
-Standard (b): + architecture-review, sprint-review, research
-Voll (c): + cloud-system-engineer, visualize, skill-creator
+Standard (b): + architecture-review, sprint-review, research, breakfix
+Voll (c): + cloud-system-engineer, visualize, skill-creator, integration-test, status, calibrate
+Optional: grafana (wenn Prometheus/Grafana Stack), supabase (wenn Supabase DB), vercel (wenn Vercel Deployment)
 
 Danach domain-spezifische Anpassung (wenn Skills kopiert wurden):
 - `ideation/references/story-template-feature.md` — Domain-Sektionen anpassen

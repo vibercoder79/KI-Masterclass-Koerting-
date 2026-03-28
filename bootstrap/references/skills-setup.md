@@ -45,7 +45,8 @@ Diese Referenz-Dateien MÜSSEN nach dem Kopieren projektspezifisch angepasst wer
 ## .claude/ISSUE_WRITING_GUIDELINES.md
 
 Diese Datei ist nicht Teil eines Skills, muss direkt erstellt werden:
-- Kopiere aus `/docker/openclaw-aolv/data/.openclaw/workspace/trading/.claude/ISSUE_WRITING_GUIDELINES.md`
+- Vorlage liegt im Bootstrap-Skill: `bootstrap/references/issue-writing-guidelines-template.md`
+- Bootstrap Phase 1 schreibt sie automatisch nach `{PROJECT_PATH}/.claude/ISSUE_WRITING_GUIDELINES.md`
 - Passe auf Projekt-Domain an
 
 ## settings.json — Skill-Aktivierung

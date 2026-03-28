@@ -36,10 +36,12 @@ Dieses Framework verbindet vier Plattformen zu einem durchgaengigen Development 
 
 1. **Kein Code ohne Issue.** Jede Aenderung wird durch ein Linear-Issue autorisiert.
 2. **Kein Issue ohne Struktur.** Jede Story folgt einem definierten Template mit Pflicht-Sektionen.
-3. **Keine Aenderung ohne Dokumentation.** Jede Code-Aenderung zieht Doku-Updates nach sich.
-4. **Single Source of Truth.** `config.js → VERSION` steuert alle Versions-Nummern zentral.
-5. **Automatische Ueberwachung.** Self-Healing Agent prueft alle 15 Min, ob Doku und Code synchron sind.
-6. **Reproduzierbarkeit.** Jeder Prozess ist als Skill codiert und wiederholbar — manuell oder automatisch.
+3. **Kein Issue ohne Spec-File.** Vor jeder Implementierung: `specs/{{ISSUE_PREFIX}}XXX.md` aus `specs/TEMPLATE.md` erstellen + Operator-OK. ⛔ Git Hook `spec-gate.sh` blockiert Commit ohne Spec.
+4. **Keine Aenderung ohne Dokumentation.** Jede Code-Aenderung zieht Doku-Updates nach sich.
+5. **Single Source of Truth.** `config.js → VERSION` steuert alle Versions-Nummern zentral. ⛔ Git Hook `doc-version-sync.sh` blockiert VERSION-Bump ohne Doku-Sync.
+6. **Automatische Ueberwachung.** Self-Healing Agent prueft alle 15 Min, ob Doku und Code synchron sind.
+7. **Reproduzierbarkeit.** Jeder Prozess ist als Skill codiert und wiederholbar — manuell oder automatisch.
+8. **API-Dokumentationspflicht.** Jede neue externe API-Integration erfordert einen Eintrag in `API_INVENTORY.md`.
 
 ---
 
