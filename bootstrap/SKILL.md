@@ -492,7 +492,77 @@ git commit -m "v{VERSION_START} — Complete Governance Bootstrap"
 git push
 ```
 
-### 5.5 Abschluss-Ausgabe
+### 5.5 CLAUDE.md Best Practices — Letzter Schritt
+
+**Erst jetzt** — nachdem Governance, Skills, Self-Healing und Git-Commit abgeschlossen sind —
+fragt Bootstrap nach Governance-Praeferenzen und aktualisiert CLAUDE.md entsprechend.
+
+**Warum am Ende:** Claude kennt jetzt die implementierte Governance und kann CLAUDE.md passend ergaenzen.
+
+Stelle diese Fragen als nummerierten Block:
+
+```
+Abschliessend: Welche Governance-Regeln soll ich in deine CLAUDE.md einbauen?
+
+SELBST-VERBESSERUNG:
+A) CLAUDE.md Self-Improvement Loop: Nach jedem Incident (/breakfix) automatisch
+   fragen "Welche Regel haette das verhindert?" und bei klarer Antwort ergaenzen.
+   → Empfohlen. Aktiv? (Ja/Nein)
+
+PROAKTIVITAET:
+B) Proaktive Impact-Benachrichtigung: Bei Aenderungen mit Auswirkung auf Architektur,
+   Gewichte oder Kill-Switches → Operator immer aktiv informieren auch ohne Aufforderung.
+   → Empfohlen. Aktiv? (Ja/Nein)
+
+CODING-REGELN:
+C) Async-Pflicht fuer Notifications: Alle Telegram/Notification-Calls in kurzlebigen
+   Prozessen IMMER mit await (verhindert stille Fehler).
+   → Empfohlen. Aktiv? (Ja/Nein)
+
+TEAM-KOLLABORATION (falls Agent-Teams genutzt werden):
+D) Parallele Sub-Agents: Bei unabhaengigen Aufgaben immer parallele Agent-Teams
+   spawnen statt sequenziell — maximale Effizienz.
+   → Nur relevant wenn du Claude Code Agent-Teams nutzt. Aktiv? (Ja/Nein)
+
+PROZESS-REGELN:
+E) Governance auch bei Hotfixes: IMMER ein Linear-Issue anlegen, auch bei
+   dringenden Fixes — keine Code-Aenderung ohne Issue.
+   → Standard in diesem Framework. Bereits in GOVERNANCE.md. Zusaetzlich in CLAUDE.md? (Ja/Nein)
+
+F) In-Progress vor Done: Jeder Sub-Task muss zuerst auf "In Progress" gesetzt
+   werden bevor er auf "Done" gesetzt werden darf.
+   → Standard. Bereits in GOVERNANCE.md. Doppelt verankern in CLAUDE.md? (Ja/Nein)
+
+WEITERE PRAEFERENZEN:
+G) Gibt es weitere Regeln aus deiner Erfahrung die du festhalten moechtest?
+   (Freitext oder 'Nein')
+```
+
+**Warte auf Antworten.** Dann:
+
+- Fuer jede mit Ja beantwortete Option: Entsprechende Zeile in `CLAUDE.md` unter
+  "Kern-Regeln" ergaenzen (mit kurzem Kommentar warum die Regel existiert)
+- Fuer G (Freitext): Formulierung als Kern-Regel ableiten und ergaenzen
+- Abschliessend Git-Commit mit den CLAUDE.md-Ergaenzungen:
+
+```bash
+cd {PROJECT_PATH}
+git add CLAUDE.md
+git commit -m "governance: CLAUDE.md Kern-Regeln aus Bootstrap Best Practices ergaenzt"
+git push
+```
+
+**Ausgabe nach CLAUDE.md-Update:**
+```
+✅ CLAUDE.md aktualisiert — {N} Kern-Regeln ergaenzt:
+  → [Liste der hinzugefuegten Regeln]
+
+Deine implementierte Governance ist jetzt vollstaendig dokumentiert.
+```
+
+---
+
+### 5.6 Abschluss-Ausgabe
 
 **Schritt 1:** Abschluss-Tabelle ausgeben:
 
@@ -504,6 +574,7 @@ git push
 | Phase 3 | Self-Healing + Doc-Sync (aus eingebetteten Templates) | done |
 | Phase 4 | Automation Daemon | done / skipped |
 | Phase 5 | Global Registry aktualisiert | done |
+| Phase 5.5 | CLAUDE.md Best Practices ergaenzt | done |
 
 **Schritt 2:** VS Code Extensions ausgeben — passend zum gewaelten Stack.
 Lies die Ausgabe-Texte aus `references/file-templates.md` Sektion "VS Code Extensions je Stack":
