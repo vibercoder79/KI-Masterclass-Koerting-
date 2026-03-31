@@ -20,8 +20,11 @@ Referenzen:
 - `references/self-healing-template.js` — Self-Healing Agent Starter
 - `references/doc-sync-template.js` — Doc-Sync Module Starter
 - `references/issue-writing-guidelines-template.md` — Issue Writing Guidelines
-- `references/skills-setup.md` — Symlinks vs. Kopie, Reihenfolge
+- `references/skills-setup.md` — Symlinks vs. Kopie, Reihenfolge, generierte Skills
 - `references/global-registry-update.md` — CLAUDE.md + MEMORY.md aktualisieren
+- `references/breakfix-template.md` — Skeleton fuer /breakfix (generiert, nicht kopiert)
+- `references/integration-test-template.md` — Skeleton fuer /integration-test (generiert)
+- `references/status-template.md` — Skeleton fuer /status (generiert)
 
 ---
 
@@ -93,10 +96,12 @@ OPTIONAL (leer lassen wenn nicht gewuenscht):
 SKILLS:
 13. Welche Skills installieren?
     a) Minimum (ideation, implement, backlog) — empfohlen fuer Start
-    b) Standard (+ architecture-review, sprint-review, research, breakfix)
-    c) Voll (alle Skills: + cloud-system-engineer, visualize, skill-creator, integration-test, status, calibrate)
+    b) Standard (+ architecture-review, sprint-review, research, breakfix*)
+    c) Voll (alle: + cloud-system-engineer, visualize, skill-creator, integration-test*, status*)
     d) Manuell auswaehlen
     e) Optional-Stack angeben (grafana, supabase, vercel)
+
+    * = wird vom Bootstrap individuell generiert (Fragen werden gestellt)
 
 DOMAIN:
 14. Welche Architektur-Dimensionen sind relevant?
@@ -347,7 +352,7 @@ done
 
 Minimum (a): ideation, implement, backlog
 Standard (b): + architecture-review, sprint-review, research, breakfix
-Voll (c): + cloud-system-engineer, visualize, skill-creator, integration-test, status, calibrate
+Voll (c): + cloud-system-engineer, visualize, skill-creator, integration-test, status
 Optional: grafana (wenn Prometheus/Grafana Stack), supabase (wenn Supabase DB), vercel (wenn Vercel Deployment)
 
 Danach domain-spezifische Anpassung (wenn Skills kopiert wurden):
@@ -355,7 +360,41 @@ Danach domain-spezifische Anpassung (wenn Skills kopiert wurden):
 - `ideation/references/architecture-dimensions.md` — Dimensionen aus Antwort 14
 - `implement/references/change-checklist.md` — Spezial-Checklisten anpassen
 
-Phase 2 Checkpoint: Liste der installierten Skills ausgeben.
+### Schritt 2.2: Projekt-spezifische Skills generieren
+
+Diese Skills werden NICHT verlinkt/kopiert sondern individuell für das Projekt generiert.
+Lies das jeweilige Template, stelle die Fragen, schreibe das generierte SKILL.md.
+
+**Für jeden gewählten projekt-spezifischen Skill in dieser Reihenfolge:**
+
+#### /breakfix (wenn gewählt — Standard-Paket oder manuell)
+
+Lies `references/breakfix-template.md` Sektion "Bootstrap: Fragen an den Operator".
+Stelle die 4 Fragen. Warte auf Antworten.
+Dann: generiere `{PROJECT_PATH}/.claude/skills/breakfix/SKILL.md` aus dem Skeleton
+mit den Platzhaltern befüllt.
+
+#### /integration-test (wenn gewählt — Voll-Paket oder manuell)
+
+Lies `references/integration-test-template.md` Sektion "Bootstrap: Fragen an den Operator".
+Stelle die 3 Fragen. Warte auf Antworten.
+Dann: generiere `{PROJECT_PATH}/.claude/skills/integration-test/SKILL.md`.
+Wenn Post-Implement = Ja: Ergänze am Ende von `{PROJECT_PATH}/.claude/skills/implement/SKILL.md`:
+```
+## Nach /implement immer ausführen
+/integration-test starten und Tier-1 Ergebnis prüfen bevor Issue geschlossen wird.
+```
+
+#### /status (wenn gewählt — Voll-Paket oder manuell)
+
+Lies `references/status-template.md` Sektion "Bootstrap: Fragen an den Operator".
+Stelle die 4 Fragen. Warte auf Antworten.
+Dann: generiere `{PROJECT_PATH}/.claude/skills/status/SKILL.md`.
+
+**Hinweis /calibrate:** calibrate ist nicht im Bootstrap enthalten — zu domain-spezifisch
+(Scoring/Gewichtungs-Kalibrierung für ML-Systeme). Bei Bedarf: `/skill-creator` verwenden.
+
+Phase 2 Checkpoint: Liste der installierten + generierten Skills ausgeben.
 
 ---
 
@@ -492,77 +531,7 @@ git commit -m "v{VERSION_START} — Complete Governance Bootstrap"
 git push
 ```
 
-### 5.5 CLAUDE.md Best Practices — Letzter Schritt
-
-**Erst jetzt** — nachdem Governance, Skills, Self-Healing und Git-Commit abgeschlossen sind —
-fragt Bootstrap nach Governance-Praeferenzen und aktualisiert CLAUDE.md entsprechend.
-
-**Warum am Ende:** Claude kennt jetzt die implementierte Governance und kann CLAUDE.md passend ergaenzen.
-
-Stelle diese Fragen als nummerierten Block:
-
-```
-Abschliessend: Welche Governance-Regeln soll ich in deine CLAUDE.md einbauen?
-
-SELBST-VERBESSERUNG:
-A) CLAUDE.md Self-Improvement Loop: Nach jedem Incident (/breakfix) automatisch
-   fragen "Welche Regel haette das verhindert?" und bei klarer Antwort ergaenzen.
-   → Empfohlen. Aktiv? (Ja/Nein)
-
-PROAKTIVITAET:
-B) Proaktive Impact-Benachrichtigung: Bei Aenderungen mit Auswirkung auf Architektur,
-   Gewichte oder Kill-Switches → Operator immer aktiv informieren auch ohne Aufforderung.
-   → Empfohlen. Aktiv? (Ja/Nein)
-
-CODING-REGELN:
-C) Async-Pflicht fuer Notifications: Alle Telegram/Notification-Calls in kurzlebigen
-   Prozessen IMMER mit await (verhindert stille Fehler).
-   → Empfohlen. Aktiv? (Ja/Nein)
-
-TEAM-KOLLABORATION (falls Agent-Teams genutzt werden):
-D) Parallele Sub-Agents: Bei unabhaengigen Aufgaben immer parallele Agent-Teams
-   spawnen statt sequenziell — maximale Effizienz.
-   → Nur relevant wenn du Claude Code Agent-Teams nutzt. Aktiv? (Ja/Nein)
-
-PROZESS-REGELN:
-E) Governance auch bei Hotfixes: IMMER ein Linear-Issue anlegen, auch bei
-   dringenden Fixes — keine Code-Aenderung ohne Issue.
-   → Standard in diesem Framework. Bereits in GOVERNANCE.md. Zusaetzlich in CLAUDE.md? (Ja/Nein)
-
-F) In-Progress vor Done: Jeder Sub-Task muss zuerst auf "In Progress" gesetzt
-   werden bevor er auf "Done" gesetzt werden darf.
-   → Standard. Bereits in GOVERNANCE.md. Doppelt verankern in CLAUDE.md? (Ja/Nein)
-
-WEITERE PRAEFERENZEN:
-G) Gibt es weitere Regeln aus deiner Erfahrung die du festhalten moechtest?
-   (Freitext oder 'Nein')
-```
-
-**Warte auf Antworten.** Dann:
-
-- Fuer jede mit Ja beantwortete Option: Entsprechende Zeile in `CLAUDE.md` unter
-  "Kern-Regeln" ergaenzen (mit kurzem Kommentar warum die Regel existiert)
-- Fuer G (Freitext): Formulierung als Kern-Regel ableiten und ergaenzen
-- Abschliessend Git-Commit mit den CLAUDE.md-Ergaenzungen:
-
-```bash
-cd {PROJECT_PATH}
-git add CLAUDE.md
-git commit -m "governance: CLAUDE.md Kern-Regeln aus Bootstrap Best Practices ergaenzt"
-git push
-```
-
-**Ausgabe nach CLAUDE.md-Update:**
-```
-✅ CLAUDE.md aktualisiert — {N} Kern-Regeln ergaenzt:
-  → [Liste der hinzugefuegten Regeln]
-
-Deine implementierte Governance ist jetzt vollstaendig dokumentiert.
-```
-
----
-
-### 5.6 Abschluss-Ausgabe
+### 5.5 Abschluss-Ausgabe
 
 **Schritt 1:** Abschluss-Tabelle ausgeben:
 
@@ -574,7 +543,6 @@ Deine implementierte Governance ist jetzt vollstaendig dokumentiert.
 | Phase 3 | Self-Healing + Doc-Sync (aus eingebetteten Templates) | done |
 | Phase 4 | Automation Daemon | done / skipped |
 | Phase 5 | Global Registry aktualisiert | done |
-| Phase 5.5 | CLAUDE.md Best Practices ergaenzt | done |
 
 **Schritt 2:** VS Code Extensions ausgeben — passend zum gewaelten Stack.
 Lies die Ausgabe-Texte aus `references/file-templates.md` Sektion "VS Code Extensions je Stack":

@@ -41,6 +41,8 @@ Optional je nach Domäne:
 ## Skill-Auswahl
 
 Welche Skills sollen installiert werden?
+
+**Generische Skills (Symlink — keine Anpassung nötig):**
 - [ ] /ideation (empfohlen)
 - [ ] /implement (empfohlen)
 - [ ] /backlog (empfohlen)
@@ -50,6 +52,17 @@ Welche Skills sollen installiert werden?
 - [ ] /cloud-system-engineer (nur wenn Hostinger VPS genutzt wird)
 - [ ] /visualize (nur wenn Miro genutzt wird)
 - [ ] /skill-creator
+
+**Projekt-spezifische Skills (werden vom Bootstrap generiert — Fragen werden gestellt):**
+- [ ] /breakfix — Incident Response mit projekt-spezifischen Diagnose-Checks
+  → Bootstrap fragt: Issue-Prefix, Incident-Verzeichnis, Daemons, Log-Files
+- [ ] /integration-test — System-Integrationstests nach /implement
+  → Bootstrap fragt: Tier-1 Checks, Tier-2 Checks, Post-Implement Auto-Run
+- [ ] /status — System Status Dashboard
+  → Bootstrap fragt: Daemons, Signal-Files, Dashboard-URL, Log-Files
+
+**Hinweis:** calibrate ist zu domain-spezifisch (Scoring/Gewichtungs-Kalibrierung)
+und wird NICHT generisch angeboten. Bei Bedarf manuell aufbauen.
 
 ## Label-Taxonomie
 

@@ -42,6 +42,26 @@ Diese Referenz-Dateien MÜSSEN nach dem Kopieren projektspezifisch angepasst wer
 | `implement/references/change-checklist.md` | Spezial-Checklisten (z.B. "Neuer Agent") |
 | `backlog/skill.md` | Linear Team-Name + Issue-Prefix |
 
+## Projekt-spezifische Skills (werden generiert, nicht kopiert)
+
+Diese Skills werden vom Bootstrap-Skill mit interaktiven Fragen generiert.
+Sie haben KEINE Quell-Kopie in `/root/.claude/skills/` — sie entstehen neu für jedes Projekt.
+
+| Skill | Template | Was Bootstrap fragt |
+|-------|----------|---------------------|
+| `/breakfix` | `bootstrap/references/breakfix-template.md` | Issue-Prefix, Incident-Dir, Daemons, Logs |
+| `/integration-test` | `bootstrap/references/integration-test-template.md` | Tier-1/2 Checks, Post-Implement? |
+| `/status` | `bootstrap/references/status-template.md` | Daemons, Signal-Files, Dashboard, Logs |
+
+**Workflow für jeden generierten Skill:**
+1. Bootstrap liest Template-Datei
+2. Bootstrap stellt die dort definierten Fragen
+3. Bootstrap schreibt `{PROJECT_PATH}/.claude/skills/{skill}/SKILL.md` mit Platzhaltern befüllt
+4. Skill enthält `## TODO`-Sektion für weitere Konkretisierung nach System-Aufbau
+
+**calibrate:** Wird NICHT generiert — zu domain-spezifisch (Scoring/Gewichtungs-Kalibrierung).
+Bei Bedarf: manuell als neuen Skill aufbauen (→ `/skill-creator`).
+
 ## .claude/ISSUE_WRITING_GUIDELINES.md
 
 Diese Datei ist nicht Teil eines Skills, muss direkt erstellt werden:
