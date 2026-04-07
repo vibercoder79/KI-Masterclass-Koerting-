@@ -3,6 +3,28 @@
 Alle diese Informationen VOR dem Setup vom Operator einsammeln.
 Felder mit * sind Pflicht. Optionale Felder können später ergänzt werden.
 
+## Pre-Flight Checklist (vor Phase 0)
+
+Diese Punkte müssen ERFÜLLT sein bevor Bootstrap startet:
+
+| Check | Befehl | Erwartet |
+|-------|--------|----------|
+| **SSH zu GitHub** | `ssh -T git@github.com` | `Hi username!...authenticated` |
+| **Node.js installiert** | `node --version` | `v18.x` oder höher |
+| **GitHub Repo existiert** | (manuell prüfen) | Leeres oder bestehendes Repo |
+| **Git konfiguriert** | `git config user.email` | Deine E-Mail-Adresse |
+
+**SSH-Zugang ist Voraussetzung für `git push`.**
+Bootstrap führt am Ende automatisch `git push origin main` aus —
+ohne SSH schlägt das fehl, egal ob Mac, PC, VPS oder Claude Code Desktop.
+
+Wo SSH eingerichtet wird:
+- **Mac/PC lokal:** `~/.ssh/` — Key in GitHub Settings hinterlegen
+- **VPS/Server:** gleicher Prozess, auf dem Server ausführen
+- **Claude Code Desktop:** nutzt SSH-Agenten des Systems — `ssh -add ~/.ssh/id_ed25519` falls nötig
+
+Details: siehe `bootstrap/README.md` Sektion "SSH-Zugang zu GitHub einrichten".
+
 ## Pflicht-Informationen
 
 | Variable | Frage an Operator | Beispiel |

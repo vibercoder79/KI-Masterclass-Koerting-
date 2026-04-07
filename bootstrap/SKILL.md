@@ -29,6 +29,58 @@ Referenzen:
 
 ---
 
+## Pre-Flight: Voraussetzungen pruefen
+
+Bevor Phase 0 startet: pruefen ob alle technischen Voraussetzungen erfuellt sind.
+**Kein Setup starten wenn Pre-Flight fehlschlaegt** — erst beheben.
+
+### SSH-Check (PFLICHT fuer git push)
+
+```bash
+ssh -T git@github.com 2>&1
+```
+
+**Erwartet:** `Hi <username>! You've successfully authenticated...`
+
+| Ergebnis | Bedeutung | Massnahme |
+|----------|-----------|-----------|
+| `Hi username!...` | SSH OK | weiter mit Phase 0 |
+| `Permission denied (publickey)` | Kein SSH Key in GitHub | Anleitung unten ausgeben |
+| `Could not resolve hostname` | Netzwerk-Problem | Internetverbindung pruefen |
+
+**Bei Fehler: Anleitung ausgeben und warten:**
+
+```
+SSH-Zugang zu GitHub fehlt. Bitte einrichten:
+
+Schritt 1 — SSH Key generieren (falls noch keiner vorhanden):
+  ssh-keygen -t ed25519 -C "deine@email.com"
+  → speichert in: ~/.ssh/id_ed25519 (privat) + ~/.ssh/id_ed25519.pub (öffentlich)
+
+Schritt 2 — Public Key in GitHub hinterlegen:
+  cat ~/.ssh/id_ed25519.pub
+  → diesen Text kopieren
+  → GitHub → Settings → SSH and GPG Keys → New SSH Key → einfügen
+
+Schritt 3 — Test:
+  ssh -T git@github.com
+  → Erwartet: "Hi <username>! You've successfully authenticated..."
+
+Sag mir "SSH OK" wenn der Test funktioniert, dann geht es weiter.
+```
+
+**Auf "SSH OK" warten, dann erneut testen, dann weiter.**
+
+### Node.js-Check (fuer Self-Healing + Doc-Sync)
+
+```bash
+node --version 2>&1
+```
+
+Falls nicht vorhanden: Operator bitten Node.js zu installieren (https://nodejs.org).
+
+---
+
 ## Phase 0: Info-Gathering — HUMAN-IN-THE-LOOP
 
 **Lies zuerst** `references/info-gathering.md` fuer die vollstaendige Liste.

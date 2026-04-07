@@ -216,12 +216,64 @@ Copy the `bootstrap/` folder anywhere → it works.
 
 ## Requirements
 
-- **Claude Code** (claude.ai/claude-code)
-- **Node.js** (for self-healing + doc-sync)
-- **Linear** account (free tier works)
-- **GitHub** account
-- **Obsidian** (optional, for doc sync)
-- **Telegram Bot** (optional, for alerts)
+### Pflicht
+
+| Was | Warum |
+|-----|-------|
+| **Claude Code** | claude.ai/claude-code — der AI-Operator |
+| **Node.js** | für self-healing + doc-sync |
+| **GitHub Repository** | bereits angelegt (leer oder mit Code) |
+| **SSH-Zugang zu GitHub** | damit `git push` ohne Passwort funktioniert — **siehe unten** |
+| **Linear** Account | Issue-Tracking (Free Tier reicht) |
+
+### SSH-Zugang zu GitHub einrichten
+
+Bootstrap führt am Ende `git push` aus. Dafür muss SSH konfiguriert sein.
+
+**Mac / lokaler PC:**
+```bash
+# 1. SSH Key generieren (falls noch keiner vorhanden)
+ssh-keygen -t ed25519 -C "deine@email.com"
+# → Key liegt in ~/.ssh/id_ed25519.pub
+
+# 2. Public Key in GitHub hinterlegen
+# GitHub → Settings → SSH and GPG Keys → New SSH Key
+cat ~/.ssh/id_ed25519.pub  # diesen Text in GitHub einfügen
+
+# 3. Testen
+ssh -T git@github.com
+# Erwartet: "Hi username! You've successfully authenticated..."
+```
+
+**VPS / Server (z.B. Hostinger):**
+```bash
+# Gleicher Prozess — auf dem Server ausführen
+ssh-keygen -t ed25519 -C "vps@meinprojekt.com"
+cat ~/.ssh/id_ed25519.pub
+# → In GitHub unter Settings → SSH Keys hinterlegen
+ssh -T git@github.com  # Test
+```
+
+**Claude Code Desktop (Mac App):**
+```bash
+# Claude Code nutzt den SSH-Agenten des Systems
+# Wenn ssh -T git@github.com funktioniert → Claude Code kann pushen
+# Falls nicht: ssh-add ~/.ssh/id_ed25519
+```
+
+> **Hinweis:** Bootstrap prüft SSH in Phase 0 automatisch mit `ssh -T git@github.com`.
+> Wenn der Test fehlschlägt, hält Bootstrap an und zeigt Einrichtungsanleitung.
+
+### Optional
+
+| Was | Wofür |
+|-----|-------|
+| **Obsidian** | Doc-Sync in Vault |
+| **Telegram Bot** | Self-Healing Alerts |
+| **OpenRouter API Key** | `/research` Deep-Tier via Perplexity |
+| **Hostinger API Key** | `/cloud-system-engineer` Skill |
+| **Miro Access Token** | `/visualize` Skill |
+| **notebooklm-py** CLI | `/notebooklm` Skill |
 
 ---
 
