@@ -161,6 +161,24 @@ Architektonische Blocker (fehlende Tests, kaputte Gates, inaktive Komponenten)
 
 ### Skills (.claude/skills/)
 {{INSTALLED_SKILLS_LIST}}
+
+---
+
+## 6. ROLLBACK-PLÄNE
+
+### [Feature-Name oder {{ISSUE_PREFIX}}-XXX]
+
+| Trigger | Massnahme |
+|---------|-----------|
+| [Fehlerbedingung 1] | [Ruecknahme-Aktion oder Config-Aenderung] |
+| [Fehlerbedingung 2] | [Workaround oder Rollback-Schritt] |
+
+**Restart-Befehl (falls Daemon vorhanden):**
+```bash
+kill $(cat .pid-file) && sleep 2 && bash start-script.sh &
+```
+
+[Abschnitt ergaenzen wenn erste produktive Features deployed werden.]
 ```
 
 ---

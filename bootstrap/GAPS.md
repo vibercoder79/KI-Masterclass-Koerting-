@@ -376,7 +376,7 @@ Ohne diesen Schritt wiederholt sich der Incident.
 
 - [x] G-01 Fehlende NIEMALS-Regeln
 - [x] G-02 Proaktive Pflicht §2
-- [ ] G-03 Rollback-Pläne §6
+- [x] G-03 Rollback-Pläne §6
 - [x] G-04 settings.json Hook-Aktivierung
 - [x] G-05 Agent Team Setup (via G-07 abgedeckt)
 - [ ] G-06 governance-template.md Abschnitte
