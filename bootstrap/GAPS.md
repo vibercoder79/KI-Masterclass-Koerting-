@@ -374,7 +374,7 @@ Ohne diesen Schritt wiederholt sich der Incident.
 
 ## STATUS
 
-- [ ] G-01 Fehlende NIEMALS-Regeln
+- [x] G-01 Fehlende NIEMALS-Regeln
 - [ ] G-02 Proaktive Pflicht §2
 - [ ] G-03 Rollback-Pläne §6
 - [x] G-04 settings.json Hook-Aktivierung

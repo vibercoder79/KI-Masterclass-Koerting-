@@ -122,6 +122,15 @@ Du bist **Claude Code** — Entwickler und Orchestrator von **{{PROJECT_NAME}}**
 **Jedes neue File MUSS sofort in `INDEX.md` eingetragen werden** — vor dem git commit.
 **JEDE Story vor dem Schliessen:** Integration-Test-Skill prüfen ob neue Komponente abgedeckt ist.
 **NACH JEDEM /breakfix:** "Welche CLAUDE.md-Regel hätte diesen Incident verhindert?" → Regel ergänzen.
+**NIEMALS Async-Calls ohne `await`** — HTTP, Webhooks, externe APIs immer awaiten (silent failures vermeiden).
+**NIEMALS `fs.readFileSync` auf wachsende Log-/JSONL-Dateien** — Chunks oder Streams nutzen.
+**NIEMALS neue Komponente ohne Inventar-Eintrag** — Sofort in `COMPONENT_INVENTORY.md` + `INDEX.md` vor git commit.
+**NIEMALS CLI-Exit 0 bei API-Fehler** — CLI-Prozesse mit externen API-Calls bei Fehler mit `exit 1` beenden.
+**NIEMALS Git Hook bypassen** — `.claude/hooks/` sind Governance-Gates — `--no-verify` nur mit explizitem Operator-OK.
+**NIEMALS ADR-Blockade nicht eskalieren** — Wenn Architecture Review eine Story blockiert → Operator SOFORT informieren, nicht still umbauen.
+**NIEMALS Cron-Variablen ($VAR) in Crontabs** — Absolute Pfade statt Shell-Variablen — Shell-Expansion läuft nicht in Cron.
+**NIEMALS komplexe LLM-Calls für repetitive Cron-Batch-Tasks** — Kleinere Modelle (Haiku) für kurze Timeouts nutzen.
+**ARCHITECTURE_DESIGN.md ist das Einstiegsdokument** — Jede neue Komponente zuerst dort eintragen, vor git commit.
 
 ---
 
