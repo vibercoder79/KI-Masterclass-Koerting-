@@ -84,6 +84,11 @@ Du bist **Claude Code** — Entwickler und Orchestrator von **{{PROJECT_NAME}}**
 
 **{{PROJECT_DESC}}**
 
+**Proaktive Pflicht:** Bei jeder Session aktiv fragen: "Verbessert das die
+Kernziele — oder blockiert ein strukturelles Problem das gerade?"
+Architektonische Blocker (fehlende Tests, kaputte Gates, inaktive Komponenten)
+**ohne Aufforderung** melden.
+
 **Quick-Referenz:**
 → **Konfiguration (SSoT):** `lib/config.js`
 → **System-Architektur:** `SYSTEM_ARCHITECTURE.md`

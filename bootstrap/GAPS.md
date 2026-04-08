@@ -375,13 +375,13 @@ Ohne diesen Schritt wiederholt sich der Incident.
 ## STATUS
 
 - [x] G-01 Fehlende NIEMALS-Regeln
-- [ ] G-02 Proaktive Pflicht §2
+- [x] G-02 Proaktive Pflicht §2
 - [ ] G-03 Rollback-Pläne §6
 - [x] G-04 settings.json Hook-Aktivierung
 - [x] G-05 Agent Team Setup (via G-07 abgedeckt)
 - [ ] G-06 governance-template.md Abschnitte
 - [x] G-07 specs/TEMPLATE.md Sektionen
-- [ ] G-08 ARCHITECTURE_DESIGN.md Template
+- [x] G-08 ARCHITECTURE_DESIGN.md Template
 - [ ] G-09 journal/STRATEGY_LOG.md
 - [ ] G-10 Docs-Kategorien
 - ❌ G-11 integration-test Architektur-Karte — ausgeschlossen (CLAW-spezifisch)
