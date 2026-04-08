@@ -307,59 +307,21 @@ docs/
 
 ## BLOCK 5: Generierte Skills — Templates zu generisch
 
-### G-11 🟠 integration-test Template: Architektur-Karte fehlt
+### G-11 ~~🟠~~ ❌ AUSGESCHLOSSEN — integration-test Architektur-Karte
 
-**Was fehlt:** CLAW integration-test hat 27 spezifische Checks mit Tier-Strategie und
-Orchestrierungslogik. Das Bootstrap-Template fragt nur "Was sind deine Tier-1 Checks?"
-und erzeugt ein generisches Skeleton.
-
-**Lücke:** Keine Vorlage für die Architektur-Karte (welche Komponenten → welche Checks).
-Kein Hinweis wann Tests aktualisiert werden müssen.
-
-**Ergänzung für `references/integration-test-template.md`:**
-
-```markdown
-## Architektur-Karte (Pflicht ausfüllen nach Installation)
-
-Ordne Checks deinen Komponenten zu:
-
-| Komponente | Tier-1 Check | Tier-2 Checks |
-|-----------|--------------|---------------|
-| Config | Syntax prüfbar? | Alle Pflicht-Keys vorhanden? |
-| Datenbank | Schreibbar? | Schema korrekt? |
-| [Eigene Komponenten ergänzen] | | |
-
-## Wann Tests aktualisieren?
-
-Nach jeder neuen Komponente: Entsprechenden Check in der Karte ergänzen.
-/integration-test SKILL.md Pflicht-AC in jeder Story.
-```
+**Entscheidung (2026-04-08):** Ausgeschlossen — CLAW-spezifisch.
+Die 27 Checks und die Orchestrierungslogik sind zu eng an das Trading-System gekoppelt.
+Das Bootstrap-Template bleibt generisch: Der Operator definiert eigene Tier-Checks beim
+Setup. Kein Mehrwert für andere Projekte durch CLAW-Karten-Konzept.
 
 ---
 
-### G-12 🟠 status Template: Architektur-Radar fehlt
+### G-12 ~~🟠~~ ❌ AUSGESCHLOSSEN — status Architektur-Radar
 
-**Was fehlt:** CLAW `/status` hat einen "Architektur-Radar" der 5 strukturelle Blocker
-gegen die Projekt-Vision prüft (nicht nur ob Daemons laufen).
-Bootstrap-Template fragt nur nach Daemons und Log-Files.
-
-**Ergänzung für `references/status-template.md`:**
-
-```markdown
-## Architektur-Radar (proaktive Struktur-Checks)
-
-Über den Daemon-Status hinaus: Welche strukturellen Metriken zeigen ob das System
-der Vision entspricht?
-
-Beispiele:
-- Anzahl aktiver Komponenten vs. geplant
-- Coverage: Werden alle kritischen Datenpunkte abgedeckt?
-- Freshness: Sind alle Signal-/Daten-Files aktuell?
-- Queue-Tiefe: Staut sich Verarbeitungs-Backlog?
-
-Bootstrap-Frage ergänzen:
-"Welche 2-3 strukturellen Metriken zeigen ob dein System 'gesund' läuft?"
-```
+**Entscheidung (2026-04-08):** Ausgeschlossen — CLAW-spezifisch.
+Brain-DB-Queries, Asset-Registry, Coverage-Gate sind Trading-Platform-Konzepte.
+Das generische Konzept "strukturelle Metriken" ist zu abstrakt um sinnvoll vorzuschreiben.
+Operator definiert domain-spezifische Radar-Checks selbst nach System-Aufbau.
 
 ---
 
@@ -401,12 +363,12 @@ Ohne diesen Schritt wiederholt sich der Incident.
 | 7 | G-02 Proaktive Pflicht §2 | 10 Min | file-templates.md |
 | 8 | G-03 Rollback-Pläne §6 | 15 Min | file-templates.md |
 | 9 | G-09 journal/STRATEGY_LOG.md | 20 Min | file-templates.md |
-| 10 | G-11 integration-test Architektur-Karte | 20 Min | integration-test-template.md |
-| 11 | G-12 status Architektur-Radar | 20 Min | status-template.md |
-| 12 | G-13 breakfix CLAUDE.md-Regel-Learning | 15 Min | breakfix-template.md |
-| 13 | G-10 Docs-Kategorien | 20 Min | file-templates.md |
+| 10 | G-13 breakfix CLAUDE.md-Regel-Learning | 15 Min | breakfix-template.md |
+| 11 | G-10 Docs-Kategorien | 20 Min | file-templates.md |
+| — | ~~G-11 integration-test Architektur-Karte~~ | ❌ ausgeschlossen | CLAW-spezifisch |
+| — | ~~G-12 status Architektur-Radar~~ | ❌ ausgeschlossen | CLAW-spezifisch |
 
-**Geschätzter Gesamtaufwand:** ~6 Stunden für Prio 1-13
+**Geschätzter Gesamtaufwand:** ~5 Stunden für Prio 1-11
 
 ---
 
@@ -422,6 +384,6 @@ Ohne diesen Schritt wiederholt sich der Incident.
 - [ ] G-08 ARCHITECTURE_DESIGN.md Template
 - [ ] G-09 journal/STRATEGY_LOG.md
 - [ ] G-10 Docs-Kategorien
-- [ ] G-11 integration-test Architektur-Karte
-- [ ] G-12 status Architektur-Radar
+- ❌ G-11 integration-test Architektur-Karte — ausgeschlossen (CLAW-spezifisch)
+- ❌ G-12 status Architektur-Radar — ausgeschlossen (CLAW-spezifisch)
 - [ ] G-13 breakfix CLAUDE.md-Regel-Learning
