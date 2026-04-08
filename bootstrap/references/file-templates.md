@@ -1039,3 +1039,31 @@ Architektur-Entscheidungen die hier getroffen werden.]
 
 *Spec erstellt vor Code. Operator-OK vor Umsetzung.*
 ```
+
+---
+
+## journal/STRATEGY_LOG.md
+
+> Pflichtlektüre vor `/ideation`. Verhindert dass Entscheidungen und Alternativen
+> wiederholt diskutiert werden.
+
+```markdown
+# {{PROJECT_NAME}} — Strategy Log
+
+> **Pflichtlektüre vor /ideation.** Dokumentiert strategische Entscheidungen und
+> evaluierte Alternativen — damit sie nicht wieder diskutiert werden.
+> **Update-Pflicht:** Nach jeder /ideation Session + nach jedem /sprint-review.
+
+---
+
+## {{TODAY}} — Initiales Setup
+
+**Kontext:** Projekt aufgesetzt mit Bootstrap v2.1
+**Entscheidungen:**
+- [Erste Architektur-Entscheidung: warum dieser Stack?]
+- [Warum dieses Issue-Tracking-System?]
+
+**Verworfen:** — (noch keine Alternativen evaluiert)
+
+**Naechster Review:** [Datum in 4 Wochen]
+```
