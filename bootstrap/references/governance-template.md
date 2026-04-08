@@ -314,16 +314,34 @@ Der Daemon nutzt denselben Flow wie `/implement`, aber **ueberspringt Schritt 4*
 - [ ] Fallback bei API-Ausfall
 - [ ] `API_INVENTORY.md` aktualisieren (falls vorhanden)
 
-### 4.7 Maschinelle Enforcement-Hooks (empfohlen)
+### 4.7 Maschinelle Enforcement-Hooks
 
-Git PreToolUse-Hooks erzwingen Governance-Regeln automatisch:
+Git PreToolUse-Hooks erzwingen Governance-Regeln **automatisch** — ohne manuelle Disziplin:
 
-| Hook | Erzwingt |
-|------|----------|
-| `spec-gate.sh` | Spec-File muss existieren bevor Code committed wird |
-| `weights-gate.sh` | Gewichte-Summe muss exakt 1.00 sein (domain-spezifisch) |
+| Hook | Blockiert | Zweck |
+|------|-----------|-------|
+| `spec-gate.sh` | `git commit` wenn kein Spec-File existiert | Kein Code ohne Story |
+| `doc-version-sync.sh` | `git commit` wenn Docs nicht auf aktueller VERSION | Keine Versionslücken |
 
-Diese Hooks liegen unter `.claude/hooks/` und werden in Claude Code settings.json registriert.
+**Aktivierung in `.claude/settings.json` (PFLICHT):**
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/spec-gate.sh" },
+          { "type": "command", "command": "bash .claude/hooks/doc-version-sync.sh" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Wichtig:** Hooks liegen unter `.claude/hooks/` und müssen executable sein (`chmod +x`).
+Ohne `settings.json`-Eintrag laufen die Hooks nie — die Dateien allein genügen nicht.
 
 ### 4.8 Handoff-Prozess (Entwickler → Operator)
 
@@ -375,6 +393,12 @@ Spiegelt Quell-Dokumentation ins Obsidian Vault:
 2. Ersetzt alte Version durch aktuelle in allen Dateien
 3. Optional: Spiegelt ins Obsidian Vault (Frontmatter-Injection, Wikilinks)
 4. Erstellt timestamped Changelog-Eintrag
+
+**Wann läuft Doc-Sync?**
+- **Trigger:** VERSION-Bump in `config.js`
+- **Was:** Alle `DOC_FILES` erhalten die neue Version + Changelog-Eintrag wird erstellt
+- **Wie:** `lib/doc-sync.js` → Funktion `syncAllDocs(newVersion)`
+- **Optional:** Spiegelt ins Obsidian Vault (Frontmatter-Injection, Wikilinks)
 
 ### 5.4 Workflow: Version erhoehen
 
@@ -498,6 +522,47 @@ Verwende `/bootstrap` — der Skill fuehrt durch alle 5 Phasen:
 **Linear Webhook:** Settings → API → Webhooks, Events: "Issue updated", Secret als `LINEAR_WEBHOOK_SECRET` in `.env`.
 
 **Spec-Gate Hook:** `.claude/hooks/spec-gate.sh` blockiert `git commit` wenn kein Spec-File existiert. In `settings.json` unter `hooks.PreToolUse` registrieren.
+
+---
+
+---
+
+## 7. Rollback-Pläne
+
+### Konzept
+
+Jedes produktive Feature das deployed wird, braucht einen dokumentierten Rollback-Plan.
+Rollback-Pläne stehen in zwei Orten:
+1. **specs/ISSUE-XXX.md** — Rollback-Plan für die Story (Planungsphase)
+2. **CLAUDE.md §6** — Aktive Rollback-Pläne für deployed Features (Laufzeitphase)
+
+### Template für CLAUDE.md §6
+
+```markdown
+## 6. ROLLBACK-PLÄNE
+
+### [Feature-Name oder ISSUE-XXX]
+
+| Trigger | Massnahme |
+|---------|-----------|
+| [Fehlerbedingung 1] | [Config-Aenderung + Loop-Restart] |
+| [Fehlerbedingung 2] | [Feature-Flag deaktivieren] |
+| Komplett-Rollback | `git revert COMMIT-HASH` + deploy |
+
+**Restart-Befehl (falls Daemon):**
+```bash
+kill $(cat .pid-file) && sleep 2 && bash start-script.sh &
+```
+```
+
+### Rollback-Trigger-Typen
+
+| Typ | Beispiel | Automatisierbar? |
+|-----|---------|:----------------:|
+| Metrik-Schwellwert | Win-Rate < 40% (20 Trades) | Ja (Self-Healing) |
+| Fehlerrate | Error-Rate > 10%/h | Ja (Alert → Rollback) |
+| Manuelle Entscheidung | Operator sieht Problem | Nein |
+| Zeitbasiert | Feature 24h in Prod ohne Probleme → Rollback entfernen | Nein |
 
 ---
 

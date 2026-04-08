@@ -379,7 +379,7 @@ Ohne diesen Schritt wiederholt sich der Incident.
 - [x] G-03 Rollback-Pläne §6
 - [x] G-04 settings.json Hook-Aktivierung
 - [x] G-05 Agent Team Setup (via G-07 abgedeckt)
-- [ ] G-06 governance-template.md Abschnitte
+- [x] G-06 governance-template.md Abschnitte
 - [x] G-07 specs/TEMPLATE.md Sektionen
 - [x] G-08 ARCHITECTURE_DESIGN.md Template
 - [x] G-09 journal/STRATEGY_LOG.md
