@@ -7,36 +7,116 @@ Beide Hooks liegen unter `.claude/hooks/` und werden via Claude Code `settings.j
 
 ## spec-gate.sh
 
-Blockiert `git commit` mit Issue-Referenz (z.B. `ISSUE-42`) wenn kein Spec-File `specs/ISSUE-42.md` existiert.
+Blockiert `git commit` mit Issue-Referenz (z.B. `ISSUE-42`) wenn:
+1. kein Spec-File `specs/ISSUE-42.md` existiert
+2. das Spec-File kein ausgefülltes `## Agent-Pattern` Feld enthält
+3. Pattern = `Agent-Team` aber keine Team-Komposition angegeben
 
 ```bash
 #!/bin/bash
-# .claude/hooks/spec-gate.sh
-# Blockiert git commit wenn Spec-File fehlt
-# Aktivierung: in .claude/settings.json als PreToolUse-Hook auf Bash-Calls
+# ─────────────────────────────────────────────────────────────────────────────
+#  SPEC-GATE — Governance Hook
+#  Blockiert git commit wenn Spec-File fehlt oder Agent-Pattern nicht ausgefüllt
+#
+#  Claude Code PreToolUse Hook (Bash)
+#  Input: JSON via stdin: {"tool_input": {"command": "..."}}
+#  Exit 1 → Tool-Call blockiert | Exit 0 → erlaubt
+# ─────────────────────────────────────────────────────────────────────────────
 
-COMMIT_MSG="$1"
-ISSUE_PREFIX="${ISSUE_PREFIX:-ISSUE-}"
+set -euo pipefail
 
-# Extrahiere Issue-ID aus Commit-Message (z.B. ISSUE-42, PROJ-123)
-ISSUE_ID=$(echo "$COMMIT_MSG" | grep -oE '[A-Z]+-[0-9]+' | head -1)
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
 
-if [ -z "$ISSUE_ID" ]; then
-  # Kein Issue-Tag → kein Gate (erlaubt fuer Infra/Docs ohne Issue)
+# JSON parsen → Command extrahieren
+INPUT=$(cat)
+CMD=$(echo "$INPUT" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    print(d.get('tool_input', {}).get('command', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+
+# Nur git commit Befehle prüfen
+if ! echo "$CMD" | grep -qE 'git commit'; then
   exit 0
 fi
 
-SPEC_FILE="specs/${ISSUE_ID}.md"
-PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+# ISSUE-XXX aus Commit-Message extrahieren (z.B. PROJ-42, ISSUE-123)
+ISSUE=$(echo "$CMD" | grep -oP '[A-Z]+-\d+' | head -1 || echo "")
+if [ -z "$ISSUE" ]; then
+  exit 0  # Kein Issue referenziert → kein Gate
+fi
 
-if [ ! -f "${PROJECT_ROOT}/${SPEC_FILE}" ]; then
-  echo "⛔ SPEC-GATE: ${SPEC_FILE} fehlt!"
-  echo "   Erstelle zuerst specs/${ISSUE_ID}.md aus specs/TEMPLATE.md"
-  echo "   Bypass: git commit --no-verify (nur bei bewusstem Bypass)"
+# ── Check 1: Spec-File vorhanden? ────────────────────────────────────────────
+SPEC_FILE="${PROJECT_ROOT}/specs/${ISSUE}.md"
+if [ ! -f "$SPEC_FILE" ]; then
+  echo ""
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  🚫  GOVERNANCE-SPERRE: specs/${ISSUE}.md fehlt!            "
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "  Commit mit ${ISSUE} ist BLOCKIERT."
+  echo "  Regel: NIEMALS Code ändern ohne Spec-File"
+  echo ""
+  echo "  Nächste Schritte:"
+  echo "  1. specs/TEMPLATE.md lesen"
+  echo "  2. specs/${ISSUE}.md erstellen + befüllen"
+  echo "  3. git add specs/${ISSUE}.md && git commit -m 'docs: specs/${ISSUE}.md'"
+  echo ""
   exit 1
 fi
 
-echo "✓ Spec-Gate: ${SPEC_FILE} gefunden"
+# ── Check 2: Agent-Pattern Sektion vorhanden? ────────────────────────────────
+if ! grep -q "## Agent-Pattern" "$SPEC_FILE"; then
+  echo ""
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  🚫  GOVERNANCE-SPERRE: Agent-Pattern fehlt in Spec!        "
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "  Commit mit ${ISSUE} ist BLOCKIERT."
+  echo "  Regel: Jede Spec braucht ## Agent-Pattern Sektion"
+  echo ""
+  echo "  Nächste Schritte:"
+  echo "  1. specs/${ISSUE}.md öffnen"
+  echo "  2. ## Agent-Pattern Sektion aus specs/TEMPLATE.md einfügen"
+  echo "  3. Gewähltes Pattern + Begründung ausfüllen"
+  echo ""
+  exit 1
+fi
+
+# ── Check 3: Gewähltes Pattern nicht leer/TBD/Platzhalter? ───────────────────
+PATTERN=$(grep "^\*\*Gewähltes Pattern:\*\*" "$SPEC_FILE" | sed 's/\*\*Gewähltes Pattern:\*\* //' | tr -d '[:space:]' || echo "")
+if [ -z "$PATTERN" ] || [ "$PATTERN" = "TBD" ] || echo "$PATTERN" | grep -q "\["; then
+  echo ""
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  🚫  GOVERNANCE-SPERRE: Agent-Pattern nicht ausgefüllt!     "
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "  'Gewähltes Pattern:' ist leer, TBD oder noch Platzhalter."
+  echo "  Erlaubte Werte: Solo | Subagent | Agent-Team | Parallel-Subagents"
+  echo ""
+  exit 1
+fi
+
+# ── Check 4: Agent-Team → Team-Komposition vorhanden? ────────────────────────
+if echo "$PATTERN" | grep -qi "Agent-Team"; then
+  TEAM=$(grep "^\*\*Team-Komposition:\*\*" "$SPEC_FILE" | sed 's/\*\*Team-Komposition:\*\* //' | tr -d '[:space:]' || echo "")
+  if [ -z "$TEAM" ] || [ "$TEAM" = "n/a" ] || echo "$TEAM" | grep -q "\["; then
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║  🚫  GOVERNANCE-SPERRE: Team-Komposition fehlt!             "
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "  Pattern 'Agent-Team' gewählt aber Team-Komposition ist leer."
+    echo "  Beispiel: Lead (Sonnet) + Explore (Haiku) + Plan (Sonnet)"
+    echo "  Eintragen: **Team-Komposition:** in specs/${ISSUE}.md"
+    echo ""
+    exit 1
+  fi
+fi
+
 exit 0
 ```
 
@@ -50,7 +130,7 @@ exit 0
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/spec-gate.sh \"$COMMIT_MSG\""
+            "command": "bash {{PROJECT_PATH}}/.claude/hooks/spec-gate.sh"
           }
         ]
       }
@@ -58,6 +138,9 @@ exit 0
   }
 }
 ```
+
+> **Anpassen für neues Projekt:** `PROJECT_ROOT` wird per `git rev-parse` automatisch gesetzt.
+> Nur der `PROJECT_PATH` Platzhalter in `settings.json` muss mit dem absoluten Projektpfad ersetzt werden.
 
 ---
 

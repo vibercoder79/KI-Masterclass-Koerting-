@@ -1043,20 +1043,18 @@ Architektur-Entscheidungen die hier getroffen werden.]
 - [ ] Keine `eval()` oder dynamische Code-Ausfuehrung
 - [ ] [Domainspezifische Checks ergaenzen]
 
-## Agent Team Setup
+## Agent-Pattern
 
-**Solo oder Team?**
+> **PFLICHT — vor dem Start ausfuellen. Wird von spec-gate.sh erzwungen.**
 
-| Kriterium | Empfehlung |
-|-----------|-----------|
-| Mehrere Dateien/Layer betroffen (> 5 Dateien) | Team (+ Architect) |
-| Blockiert andere Stories | Team |
-| Sicherheits-/Compliance-relevant | Team + Security Review |
-| Infra-Aenderungen (Docker, Cron, DNS) | Team + Cloud Engineer |
-| Einzelne Komponente, klares Template | Solo |
-| Docs / Reviews | Solo |
+- [ ] **Solo** — 1 klar abgegrenzte Story, <5 Dateien, keine parallelen Komponenten
+- [ ] **Subagent** — isolierter Task / Einzelrecherche / Explore-Auftrag
+- [ ] **Agent-Team** — >3 unabhaengige Tasks ODER Debugging mit unklarer Ursache ODER Cross-Layer
+- [ ] **Parallel-Subagents** — mehrere unabhaengige Recherchen gleichzeitig
 
-**Gewaehlt:** [ ] Solo  [ ] Team — [Begruendung in einem Satz]
+**Gewähltes Pattern:** [Solo / Subagent / Agent-Team / Parallel-Subagents]
+**Begründung:** [Warum dieses Pattern? Tasks zaehlen, Trigger-Bedingung benennen]
+**Team-Komposition:** [Nur bei Agent-Team: z.B. "Lead (Sonnet) + Explore (Haiku) + Plan (Sonnet)" — sonst "n/a"]
 
 ## Erwarteter Outcome (Learning-Loop)
 
