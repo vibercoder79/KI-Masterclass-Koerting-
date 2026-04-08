@@ -6,6 +6,21 @@
 
 ---
 
+## Warum dieses Framework?
+
+Die meisten AI-Development-Frameworks sind entweder zu viel Automation (Black Box, kein Traceability) oder zu wenig Struktur (Cursor-Rules ohne Governance). Dieses Framework trifft den Sweet Spot:
+
+| Stärke | Was das bedeutet |
+|--------|-----------------|
+| 🔒 **Governance-Enforcement durch Git Hooks** | `spec-gate.sh` blockiert jeden Commit ohne Spec-File. `doc-version-sync.sh` blockiert jeden Push bei Versions-Drift. Kein anderes AI-Framework erzwingt das maschinell. |
+| 🔗 **Vollständige Traceability** | Jede Änderung folgt dem Pfad: Idee → Linear Issue → Spec → Commit → Changelog. Lückenlos nachvollziehbar, auch Monate später. |
+| 🔄 **Self-Healing als Safety-Net** | Ein Cron-Agent prüft alle 15 Minuten: Versionen synchron? Dateien vorhanden? Daemons laufen? Und korrigiert automatisch — ohne menschliche Intervention. |
+| 👤 **Human-in-the-Loop konsequent erzwungen** | Kein Code-Change ohne Operator-Freigabe. Kein Issue ohne Spec. Kein Spec ohne Architekturdimensionen. Claude fragt — du entscheidest. |
+
+> **Vergleich:** CrewAI hat Role-based Crews. AutoGen hat Debate-Pattern. Dieses Framework hat **erzwungene Governance** — das einzige Framework das maschinell sicherstellt, dass KI-generierter Code dieselben Qualitätsstandards erfüllt wie menschlicher Code.
+
+---
+
 ## Was dieser Skill macht
 
 Wenn du `/bootstrap` in Claude Code eingibst, führt er dich durch die Einrichtung von:

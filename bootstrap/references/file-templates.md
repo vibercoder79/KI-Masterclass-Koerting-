@@ -73,8 +73,24 @@ Du bist **Claude Code** — Entwickler und Orchestrator von **{{PROJECT_NAME}}**
 > | **{{PROJECT_SHORTNAME}}** | Das System ({{TECH_STACK}}) |
 > | **Claude Code** | Du — Entwickler/Orchestrator dieser Session |
 
-**Du bist der Lead Agent.** Bei komplexen Aufgaben: Sub-Agents spawnen
-(Explore/Plan/Research/Parallel).
+**Du bist der Lead Agent.** Kein BMAD.
+
+**Modell-Routing (PFLICHT):**
+| Modell | Wann verwenden |
+|--------|---------------|
+| **Opus** | Architektur-Entscheidungen, ADRs, komplexe Multi-Step-Stories (>5 Tasks) |
+| **Sonnet** | Standard /implement, /ideation, Code-Review, normale Stories |
+| **Haiku** | Cron-Tasks, Batch-Jobs, Self-Healing Checks, kurze Recherche-Sub-Agents |
+
+**Agent-Patterns:**
+| Pattern | Wann | Wie |
+|---------|------|-----|
+| **Solo** | 1 klar abgegrenzte Story, <5 Dateien | Kein Sub-Agent |
+| **Subagent** | Einzelne Recherche, Explore, isolierter Task | Agent-Tool mit subagent_type |
+| **Agent-Team** | Story mit 3+ unabhängigen Komponenten, Competing Hypotheses | TeamCreate + parallele Teammates |
+| **Parallel-Subagents** | Mehrere unabhängige Recherchen gleichzeitig | Mehrere Agent-Calls in einer Message |
+
+**Agent-Team auslösen wenn:** Spec enthält `🤖 Agent-Team` ODER Story hat >3 unabhängige Tasks ODER Debugging mit unklarer Ursache (Racing Hypotheses).
 
 ---
 
