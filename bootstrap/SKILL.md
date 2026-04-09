@@ -14,9 +14,12 @@ Interaktiver 5-Phasen-Workflow fuer ein neues Projekt mit OpenCLAW Governance.
 
 Referenzen:
 - `references/info-gathering.md` — Pflicht-Infos vor dem Setup
-- `references/file-templates.md` — config.js, CLAUDE.md, CHANGELOG, API_INVENTORY, INDEX, PROCESS_CATALOG, specs/TEMPLATE etc.
+- `references/file-templates.md` — config.js, CLAUDE.md, .env.example (mit Key-Erklaerungen), CHANGELOG, API_INVENTORY, INDEX, PROCESS_CATALOG, specs/TEMPLATE etc.
 - `references/governance-template.md` — GOVERNANCE.md vollstaendig eingebettet (inkl. Spec-Driven Dev + ADR)
 - `references/hooks-setup.md` — Git Hook Templates (spec-gate.sh, doc-version-sync.sh)
+- `references/mcp-setup.md` — MCP-Server-Setup fuer Linear, Grafana, Supabase, Hostinger etc. + settings.json Template
+- `references/telegram-setup.md` — Telegram Bot erstellen, Chat-ID ermitteln, Self-Healing-Integration, Linear-Webhook
+- `references/grafana-monitoring.md` — Grafana Cloud + Alloy + /grafana Skill Nutzungsmuster
 - `references/self-healing-template.js` — Self-Healing Agent Starter
 - `references/doc-sync-template.js` — Doc-Sync Module Starter
 - `references/issue-writing-guidelines-template.md` — Issue Writing Guidelines
@@ -81,6 +84,148 @@ Falls nicht vorhanden: Operator bitten Node.js zu installieren (https://nodejs.o
 
 ---
 
+### Obsidian Sync Setup (PFLICHT wenn Vault genutzt wird)
+
+Stelle dem Operator diese eine Frage — alleine, auf Antwort warten:
+
+```
+Wo laeuft Claude Code?
+
+a) Lokal (Mac / Windows PC) — Obsidian Desktop laeuft auf demselben Rechner
+b) Remote (VPS / Docker / Server) — kein GUI, kein Obsidian Desktop
+```
+
+Speichere die Antwort als `{{OBSIDIAN_MODE}}`.
+
+---
+
+#### Szenario a) Lokal — Obsidian Desktop
+
+Keine zusaetzliche Installation noetig.
+
+**Wie es funktioniert:**
+- `lib/doc-sync.js` schreibt `.md`-Dateien direkt in den lokalen Vault-Ordner
+- Obsidian Desktop liest den Vault-Ordner nativ
+- Obsidian Sync (cloud) laeuft innerhalb der Desktop-App — keine separaten Credentials noetig
+
+**Voraussetzung pruefen:**
+
+```
+Ist Obsidian Desktop installiert und der Vault-Ordner bereits angelegt?
+Wenn ja: Vault-Pfad in Phase 0 Frage 8 angeben — fertig.
+Wenn nein: Obsidian installieren (https://obsidian.md) und Vault anlegen.
+```
+
+Warte auf Bestaetigung, dann weiter.
+
+---
+
+#### Szenario b) Remote / VPS — obsidian-headless
+
+Auf einem Server ohne GUI muss `obsidian-headless` als Daemon eingerichtet werden.
+Dieser haelt die Obsidian-Sync-Credentials und spiegelt den lokalen Vault-Ordner in die Obsidian Cloud.
+
+**Schritt 1 — Obsidian Sync Account pruefen:**
+
+```
+Voraussetzung: Obsidian Sync Abo (nicht kostenlos — obsidian.md/pricing).
+Du brauchst: E-Mail + Passwort des Obsidian-Accounts.
+```
+
+**Schritt 2 — obsidian-headless installieren:**
+
+```bash
+npm install -g obsidian-headless
+```
+
+**Schritt 3 — Login + auth_token holen:**
+
+```bash
+mkdir -p ~/.config/obsidian-headless
+obsidian-headless login
+# Gibt auth_token aus — wird automatisch in ~/.config/obsidian-headless/auth_token gespeichert
+```
+
+Bei Fehler: manuell Token anfordern:
+```bash
+curl -s -X POST https://sync.obsidian.md/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"deine@email.com","password":"deinPasswort"}' \
+  | jq -r '.token' > ~/.config/obsidian-headless/auth_token
+```
+
+**Schritt 4 — Vault-Name in Obsidian ermitteln:**
+
+```
+In Obsidian Desktop (oder obsidian.md): Settings → Sync → Remote Vault → Name notieren.
+Dieser Name wird als Parameter uebergeben.
+```
+
+**Schritt 5 — Daemon starten und testen:**
+
+```bash
+# Einmaliger Test (Vault-Name ersetzen):
+obsidian-headless sync --path /path/to/vault --vault "Dein Vault Name"
+
+# Erwartet: "Sync started", keine Fehler
+```
+
+**Schritt 6 — Daemon als Hintergrundprozess einrichten (systemd oder nohup):**
+
+Option A — systemd (empfohlen fuer VPS):
+```bash
+cat > /etc/systemd/system/obsidian-sync.service << 'EOF'
+[Unit]
+Description=Obsidian Headless Sync
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/obsidian-headless sync --path /path/to/vault
+Restart=always
+RestartSec=10
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable obsidian-sync
+systemctl start obsidian-sync
+systemctl status obsidian-sync
+```
+
+Option B — nohup (schnell, kein systemd):
+```bash
+nohup obsidian-headless sync --path /path/to/vault >> /var/log/obsidian-sync.log 2>&1 &
+echo $! > /var/run/obsidian-sync.pid
+```
+
+**Schritt 7 — Pruefen ob Daemon laeuft:**
+
+```bash
+ps aux | grep obsidian-headless | grep -v grep
+# Erwartet: Prozess sichtbar
+```
+
+**Credentials-Speicherort:** `~/.config/obsidian-headless/auth_token`
+**Log-Pfad (Option B):** `/var/log/obsidian-sync.log`
+
+Warte auf Bestaetigung "Obsidian Sync OK", dann weiter.
+
+---
+
+**Zusammenfassung: Welches Szenario — was tun:**
+
+| Szenario | Vault-Schreiben | Cloud-Sync | Credentials |
+|----------|----------------|------------|-------------|
+| a) Lokal | `doc-sync.js` → lokaler Ordner | Obsidian Desktop App | In Obsidian Desktop |
+| b) Remote/VPS | `doc-sync.js` → Ordner auf Server | `obsidian-headless` Daemon | `~/.config/obsidian-headless/auth_token` |
+
+Speichere `{{OBSIDIAN_VAULT_PATH}}` fuer Phase 3.2 (wird dort in `lib/doc-sync.js` eingetragen).
+
+---
+
 ## Phase 0: Info-Gathering — HUMAN-IN-THE-LOOP
 
 **Lies zuerst** `references/info-gathering.md` fuer die vollstaendige Liste.
@@ -142,9 +287,12 @@ PFLICHT:
 
 OPTIONAL (leer lassen wenn nicht gewuenscht):
 9. Telegram Bot Token fuer Alerts?
+   (Setup-Anleitung folgt in Phase 3 — references/telegram-setup.md)
 10. Perplexity / OpenRouter API Key fuer Deep Research?
 11. Miro Board URL fuer /visualize?
 12. Automation Daemon einrichten? (Ja/Nein, default: Nein)
+13. Grafana Cloud fuer Monitoring? (Ja/Nein)
+    (URL + API Key werden in Phase 3 abgefragt — references/grafana-monitoring.md)
 
 SKILLS:
 13. Welche Skills installieren?
@@ -389,7 +537,22 @@ Phase 1 Checkpoint: Kurze Zusammenfassung ausgeben was angelegt wurde.
 
 ---
 
-## Phase 2: Skills installieren
+## Phase 2: MCP-Setup + Skills installieren
+
+### 2.0 MCP-Server konfigurieren (vor Skills-Installation)
+
+Lies `references/mcp-setup.md` komplett.
+
+**Schritt 1:** Frage dem Operator welche MCP-Server benoetigt werden (Auswahlliste in mcp-setup.md §1).
+**Schritt 2:** `.claude/settings.json` anlegen mit Minimal-Template (mcp-setup.md §2).
+**Schritt 3:** Gewaehlte MCP-Server einrichten (mcp-setup.md §3 — je Dienst).
+**Schritt 4:** API-Keys verifizieren (mcp-setup.md §4 — Verify-Calls ausfuehren).
+**Schritt 5:** MCP-Server-Start pruefen (mcp-setup.md §5).
+
+**Warte auf Bestaetigung dass MCP funktioniert** bevor Skills installiert werden —
+Skills setzen funktionierende MCP-Tools voraus.
+
+---
 
 Lies `references/skills-setup.md` fuer Details zu Symlinks vs. Kopie.
 
@@ -529,14 +692,172 @@ node agents/self-healing.js
 
 Erwartet: "All X docs at version {VERSION_START}"
 
-### 3.4 Cron-Job
+### 3.4 Cron-Job — Umgebung bestimmen
 
-Cron ergaenzen (alle 15 Minuten):
+Stelle dem Operator diese Frage:
+
 ```
-*/15 * * * * cd {PROJECT_PATH} && node agents/self-healing.js >> /var/log/self-healing-{slug}.log 2>&1
+Laeuft das System in Docker oder direkt auf dem Host?
+
+a) Docker / supercronic — Crontab-Datei im Container
+b) Host-Systemd — systemd.timer
+c) Standard-Cron (crontab -e) — lokale Entwicklung oder einfache VPS
 ```
 
-Phase 3 Checkpoint: Self-Healing Test-Output zeigen.
+---
+
+#### Option a) Docker + supercronic (empfohlen fuer VPS/Container)
+
+In Docker-Umgebungen ist Standard-`cron` oft nicht zuverlaessig.
+`supercronic` ist ein Drop-in-Ersatz der direkt als Prozess laeuft.
+
+**Crontab-Datei anlegen** (`{PROJECT_PATH}/crontab`):
+
+```
+# WICHTIG: Keine Variablen ($VAR) — nur absolute Pfade
+*/15 * * * * node /data/.openclaw/workspace/{slug}/agents/self-healing.js >> /data/.openclaw/workspace/{slug}/logs/self-healing.log 2>&1
+0 6 * * * node /data/.openclaw/workspace/{slug}/lib/doc-sync.js >> /data/.openclaw/workspace/{slug}/logs/doc-sync.log 2>&1
+```
+
+**In Dockerfile/docker-compose.yml eintragen:**
+
+```yaml
+# docker-compose.yml
+services:
+  myproject:
+    command: supercronic /data/.openclaw/workspace/{slug}/crontab
+    # oder als Hintergrundprozess neben dem Haupt-Prozess:
+    # entrypoint: ["sh", "-c", "supercronic /path/to/crontab & node main.js"]
+```
+
+**supercronic installieren (im Dockerfile):**
+
+```dockerfile
+RUN curl -fsSL "https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64" \
+    -o /usr/local/bin/supercronic && chmod +x /usr/local/bin/supercronic
+```
+
+---
+
+#### Option b) systemd Timer (empfohlen fuer Host-VPS)
+
+```bash
+# /etc/systemd/system/self-healing-{slug}.service
+cat > /etc/systemd/system/self-healing-{slug}.service << 'EOF'
+[Unit]
+Description=Self-Healing {PROJECT_NAME}
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/node {PROJECT_PATH}/agents/self-healing.js
+WorkingDirectory={PROJECT_PATH}
+StandardOutput=append:{PROJECT_PATH}/logs/self-healing.log
+StandardError=append:{PROJECT_PATH}/logs/self-healing.log
+EOF
+
+# /etc/systemd/system/self-healing-{slug}.timer
+cat > /etc/systemd/system/self-healing-{slug}.timer << 'EOF'
+[Unit]
+Description=Self-Healing Timer {PROJECT_NAME}
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl daemon-reload
+systemctl enable self-healing-{slug}.timer
+systemctl start self-healing-{slug}.timer
+
+# Pruefen:
+systemctl status self-healing-{slug}.timer
+```
+
+**Vorteil systemd Timer:** Startet automatisch nach Server-Reboot (B-06 geloest).
+
+---
+
+#### Option c) Standard-Cron (lokale Entwicklung)
+
+```bash
+crontab -e
+```
+
+Eintrag:
+```
+*/15 * * * * cd {PROJECT_PATH} && node agents/self-healing.js >> {PROJECT_PATH}/logs/self-healing.log 2>&1
+```
+
+**Achtung:** Auf Servern nach Reboot pruefen ob cron-Daemon laeuft: `systemctl status cron`.
+
+---
+
+### 3.5 Log-Rotation einrichten
+
+Ohne Log-Rotation fuellen Self-Healing und Doc-Sync-Logs den Speicher.
+
+**logrotate konfigurieren:**
+
+```bash
+cat > /etc/logrotate.d/{slug} << 'EOF'
+{PROJECT_PATH}/logs/*.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0644 root root
+}
+EOF
+
+# Sofort testen (Dry-Run):
+logrotate --debug /etc/logrotate.d/{slug}
+```
+
+**Ergebnis:** Logs werden taeglich rotiert, 7 Tage aufbewahrt, aeltere komprimiert.
+
+**Falls kein logrotate verfuegbar** (Docker-Container):
+In der Crontab einen Aufraeum-Job ergaenzen:
+
+```
+# Logs aelter als 7 Tage loeschen
+0 3 * * * find {PROJECT_PATH}/logs -name "*.log" -mtime +7 -delete
+```
+
+---
+
+### 3.6 Prozess-Persistenz nach Reboot pruefen
+
+Alle Daemons die auf dem Host laufen (Self-Healing, obsidian-headless, linear-webhook)
+muessen nach einem Server-Reboot automatisch wieder starten.
+
+**Checkliste:**
+
+```bash
+# Fuer jeden systemd-Service:
+systemctl is-enabled obsidian-sync.service   # Erwartet: "enabled"
+systemctl is-enabled self-healing-{slug}.timer # Erwartet: "enabled"
+
+# Reboot-Test (nur wenn moeglich):
+# sudo reboot
+# Nach Neustart: ps aux | grep "obsidian-headless\|self-healing"
+```
+
+**Fuer nohup-Prozesse:** @reboot-Cron-Eintrag:
+
+```bash
+crontab -e
+# Eintrag:
+@reboot cd {PROJECT_PATH} && nohup node agents/linear-webhook.js >> logs/webhook.log 2>&1 &
+```
+
+Phase 3 Checkpoint: Self-Healing Test-Output zeigen + Cron/Timer-Status bestätigen.
 
 ---
 
@@ -657,7 +978,53 @@ Lies die Ausgabe-Texte aus `references/file-templates.md` Sektion "VS Code Exten
 - Stack-spezifische Extensions zusaetzlich ausgeben
 - Bei Python: eigene Liste (ersetzt Basis)
 
-**Schritt 3:** Naechste Schritte ausgeben:
+**Schritt 3:** Smoke-Test ausfuehren — Go/No-Go vor dem ersten /ideation:
+
+```
+Bootstrap Smoke-Test — bitte jeden Punkt pruefen:
+
+GOVERNANCE:
+[ ] spec-gate.sh blockiert: git commit ohne Spec-Datei schlaegt fehl
+    Test: touch test.js && git add test.js && git commit -m "PROJ-99 test"
+    Erwartet: Fehler "Kein Spec-File fuer PROJ-99 gefunden"
+
+[ ] Linear API erreichbar: /ideation kann Issues anlegen
+    Test: In Claude Code — "Zeige mir die offenen Issues in Linear"
+    Erwartet: Issue-Liste (keine Auth-Fehler)
+
+[ ] MCP-Tools verfuegbar: mcp__claude_ai_Linear__* Tools aktiv
+    Test: In Claude Code — "Welche Linear-Teams gibt es?"
+    Erwartet: Team-Liste (keine "Tool not available"-Fehler)
+
+SELF-HEALING:
+[ ] Self-Healing laeuft durch ohne Fehler
+    Test: node {PROJECT_PATH}/agents/self-healing.js
+    Erwartet: "All X docs at version {VERSION_START}" — kein ERROR
+
+[ ] Cron/Timer aktiv und wird ausgefuehrt
+    Test (systemd): systemctl status self-healing-{slug}.timer
+    Test (cron): crontab -l | grep self-healing
+    Erwartet: Timer/Cron sichtbar und "enabled"
+
+OBSIDIAN (wenn konfiguriert):
+[ ] doc-sync schreibt in Vault
+    Test: node -e "require('./lib/doc-sync').syncAllDocs().then(() => console.log('OK'))"
+    Erwartet: "OK" — Dateien in {OBSIDIAN_VAULT_PATH} aktualisiert
+
+[ ] obsidian-headless laeuft (VPS-Szenario)
+    Test: ps aux | grep obsidian-headless | grep -v grep
+    Erwartet: Prozess sichtbar
+
+TELEGRAM (wenn konfiguriert):
+[ ] Test-Nachricht wird zugestellt
+    Test: siehe references/telegram-setup.md — curl-Befehl ausfuehren
+    Erwartet: Nachricht erscheint im Telegram-Chat
+
+Wenn alle relevanten Punkte gruen: Bootstrap erfolgreich abgeschlossen.
+Wenn ein Punkt rot: Nicht weitermachen — erst beheben.
+```
+
+**Schritt 4:** Naechste Schritte ausgeben:
 1. `cd {PROJECT_PATH} && claude` — erstes Projekt-Gespraech starten
 2. `/ideation` — erste Story erstellen
 3. CLAUDE.md um projektspezifische Architektur ergaenzen wenn System waechst
@@ -687,7 +1054,10 @@ Dieser Skill ist **vollstaendig portabel** — keine externen Dateisystem-Abhaen
 | Self-Healing Script | `references/self-healing-template.js` (eingebettet) |
 | Doc-Sync Script | `references/doc-sync-template.js` (eingebettet) |
 | Issue Writing Guidelines | `references/issue-writing-guidelines-template.md` (eingebettet) |
-| Datei-Templates | `references/file-templates.md` (eingebettet) |
+| Datei-Templates + .env.example | `references/file-templates.md` (eingebettet) |
+| MCP-Setup Anleitung | `references/mcp-setup.md` (eingebettet) |
+| Telegram Bot Setup + Linear-Webhook | `references/telegram-setup.md` (eingebettet) |
+| Grafana Monitoring Pattern | `references/grafana-monitoring.md` (eingebettet) |
 | Skill-Referenzen (ideation etc.) | Separat installieren oder von GitHub |
 
 Um diesen Skill auf einer neuen Maschine zu verwenden:

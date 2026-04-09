@@ -58,12 +58,31 @@ Details: siehe `bootstrap/README.md` Sektion "SSH-Zugang zu GitHub einrichten".
 
 ## Optionale Informationen
 
-| Variable | Frage an Operator | Default |
-|----------|------------------|---------|
-| `TELEGRAM_BOT_TOKEN` | Telegram Bot Token für Alerts? | — (skip) |
-| `PERPLEXITY_API_KEY` | Perplexity API Key für Deep Research? | — (OPENROUTER_API_KEY alternativ) |
-| `MIRO_BOARD_URL` | Miro Board URL für /visualize? | — (skip) |
-| `DAEMON_ENABLED` | Automation Daemon einrichten? (Ja/Nein) | Nein |
+| Variable | Frage an Operator | Default | Anleitung |
+|----------|------------------|---------|-----------|
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot Token für Alerts? | — (skip) | `references/telegram-setup.md` |
+| `TELEGRAM_CHAT_ID` | Telegram Chat-ID (persönlich oder Gruppe)? | — | `references/telegram-setup.md` |
+| `TELEGRAM_LINEAR_WEBHOOK` | Linear-Webhook → Telegram Notifications? (Ja/Nein) | Nein | `references/telegram-setup.md §5` |
+| `GRAFANA_ENABLED` | Grafana Cloud für Monitoring? (Ja/Nein) | Nein | `references/grafana-monitoring.md` |
+| `GRAFANA_URL` | Grafana Cloud URL (wenn Ja)? | — | `references/grafana-monitoring.md` |
+| `GRAFANA_API_KEY` | Grafana API Key (wenn Ja)? | — | `references/grafana-monitoring.md` |
+| `OPENROUTER_API_KEY` | OpenRouter API Key für Deep Research? | — (Perplexity alternativ) | — |
+| `MIRO_BOARD_URL` | Miro Board URL für /visualize? | — (skip) | — |
+| `DAEMON_ENABLED` | Automation Daemon einrichten? (Ja/Nein) | Nein | Phase 4 in SKILL.md |
+
+## MCP-Server (bestimmt Settings-Konfiguration)
+
+Welche externen Dienste soll Claude Code direkt ansprechen?
+Vollstaendige Auswahlliste und Einrichtungsanleitung: `references/mcp-setup.md §1`
+
+Pflicht-Auswahl fuer Governance:
+- Linear (fast immer noetig — Issue Tracking)
+
+Haeufig genutzt:
+- Telegram (via Bot API — kein MCP, aber settings.json permissions)
+- Grafana (wenn GRAFANA_ENABLED = Ja)
+- Hostinger (wenn VPS-Management gewuenscht)
+- Supabase (wenn Supabase als Datenbank)
 
 ## Architektur-Dimensionen
 

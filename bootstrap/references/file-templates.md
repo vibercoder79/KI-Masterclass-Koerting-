@@ -272,24 +272,64 @@ kill $(cat .pid-file) && sleep 2 && bash start-script.sh &
 
 ```
 # {{PROJECT_NAME}} — Umgebungsvariablen
-# NIEMALS echte Keys committen — nur in .env eintragen
+# NIEMALS echte Keys committen — nur in .env (ohne .example) eintragen!
+# Kopieren: cp .env.example .env  →  dann Keys einsetzen
 
-# Linear
-LINEAR_API_KEY=your_linear_api_key_here
-LINEAR_WEBHOOK_SECRET=your_webhook_secret_here
+# ─── LINEAR (Pflicht fuer Governance) ────────────────────────────────────────
+# Format: beginnt mit "lin_api_" gefolgt von 40 Zeichen
+# Wo finden: linear.app → Settings → API → Personal API Keys → "New key"
+# Testen: curl -s -X POST https://api.linear.app/graphql \
+#   -H "Authorization: $LINEAR_API_KEY" -H "Content-Type: application/json" \
+#   -d '{"query":"{ viewer { name } }"}' | jq '.data.viewer.name'
+LINEAR_API_KEY=DEIN_LINEAR_API_KEY_HIER_EINTRAGEN
 
-# GitHub
-# SSH Key wird empfohlen statt Token
+# Format: beliebiger zufaelliger String (mind. 32 Zeichen)
+# Wo: du generierst ihn selbst: openssl rand -hex 32
+# Wofuer: HMAC-Signierung eingehender Linear-Webhook-Calls
+LINEAR_WEBHOOK_SECRET=
 
-# Optional: Telegram Alerts
+# ─── TELEGRAM (Optional — Alerts + Incident-Meldungen) ───────────────────────
+# Format: 7123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# Wo: @BotFather in Telegram → /newbot → Token erhalten
+# Setup-Anleitung: references/telegram-setup.md
+# Testen: curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getMe"
 # TELEGRAM_BOT_TOKEN=
+
+# Format: Ganzzahl (positiv fuer Einzelchat, negativ fuer Gruppen z.B. -100123456789)
+# Wo: @BotFather-Bot starten → curl /getUpdates → chat.id aus Antwort
 # TELEGRAM_CHAT_ID=
 
-# Optional: Research
+# Nur wenn Linear-Webhook-Notifications via Telegram genutzt werden:
+# Format: 4-stellige Zahl (1024-65535), default: 3456
+# LINEAR_WEBHOOK_PORT=3456
+
+# ─── RESEARCH (Optional — /research Skill Deep-Tier) ─────────────────────────
+# Format: sk-or-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# Wo: openrouter.ai → Keys → "Create Key"
+# Wofuer: Perplexity sonar-deep-research via OpenRouter
+# Testen: curl https://openrouter.ai/api/v1/auth/key -H "Authorization: Bearer $OPENROUTER_API_KEY"
 # OPENROUTER_API_KEY=
 
-# Optional: Miro
+# ─── GRAFANA (Optional — Monitoring Dashboards) ───────────────────────────────
+# Format: https://yourorg.grafana.net  (kein trailing slash)
+# Wo: Grafana Cloud → Stack-URL aus der Uebersicht
+# Setup: references/grafana-monitoring.md
+# GRAFANA_URL=https://yourorg.grafana.net
+
+# Format: glsa_xxxxxxxxxxxxxxxxxxxx
+# Wo: Grafana → Administration → Service Accounts → Token erstellen (Role: Editor)
+# Testen: curl -H "Authorization: Bearer $GRAFANA_API_KEY" $GRAFANA_URL/api/org | jq '.name'
+# GRAFANA_API_KEY=
+
+# ─── MIRO (Optional — /visualize Skill) ──────────────────────────────────────
+# Format: eyJtaXJv... (JWT-Token)
+# Wo: miro.com → Profil → Apps → "Create new app" → Access Token
 # MIRO_ACCESS_TOKEN=
+
+# ─── CLAUDE CODE (Nur fuer Automation Daemon) ────────────────────────────────
+# Verhindert Netzwerk-Calls aus verschachtelten Claude-Instanzen (Nested Sessions)
+# Nur setzen wenn Automation Daemon (Phase 4) eingerichtet wird
+# CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 ```
 
 ---
