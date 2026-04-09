@@ -3,6 +3,7 @@
 > Ein **portabler Claude Code Skill**, der ein vollständiges KI-gesteuertes Entwicklungs-Governance-Framework für jedes neue Projekt einrichtet — in 5 geführten Phasen, ohne externe Abhängigkeiten.
 
 **Ursprung:** [OpenCLAW Trading System](https://github.com/vibercoder79/openclaw_trading) — seit 2025 im Produktivbetrieb erprobt.
+**Grundlage:** Claude Code Best Practice Checkliste v10 (OWLIST GmbH, 2026) — Context Engineering, Global Settings, Kontextschutz und Agent-Patterns sind als integraler Bestandteil in den Bootstrap-Prozess eingeflossen.
 
 ---
 
@@ -221,7 +222,21 @@ Keine Abhängigkeiten auf andere Dateien. Alle Templates sind in `references/` e
 
 ## Was du vorher brauchst
 
-Claude fragt dich in Phase 0 nach folgenden Informationen:
+### Phase 0a — Wird automatisch geprüft und eingerichtet
+
+Bootstrap prüft vor dem eigentlichen Setup ob deine globale Claude Code Konfiguration stimmt und richtet sie bei Bedarf ein:
+
+| Was | Datei | Prüft/Setzt |
+|-----|-------|------------|
+| **Auto-Memory** | `~/.claude/settings.json` | `autoMemoryEnabled: true` — Claude speichert Session-Erkenntnisse |
+| **Agent Teams** | `~/.claude/settings.json` | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` — parallele Agents aktiviert |
+| **Modell-Routing** | `~/.claude/CLAUDE.md` | Opus/Sonnet/Haiku je Task-Typ — spart systematisch Kosten |
+| **Agent-Strategie** | `~/.claude/CLAUDE.md` | Wann Solo, Sub-Agent, Agent-Team — verhindert unnötige 3-5× Kosten |
+| **Secrets-Policy** | `~/.claude/CLAUDE.md` | Claude liest niemals `.env`-Dateien — API-Key-Schutz |
+
+> Diese Einstellungen gelten für **alle Projekte** auf der Maschine — einmalig, nie wieder anfassen.
+
+### Phase 0 — Claude fragt dich nach diesen Infos
 
 **Pflichtangaben:**
 - Projektname & Ein-Satz-Beschreibung
@@ -229,11 +244,12 @@ Claude fragt dich in Phase 0 nach folgenden Informationen:
 - GitHub Repository URL
 - Linear Team-Name (Slug) + Issue-Präfix (z.B. `PROJ-`)
 - Startversion (z.B. `1.0.0`)
-- Obsidian Vault-Pfad (für Doc-Sync)
+- Obsidian Vault-Pfad (für Doc-Sync) — lokal oder VPS (Bootstrap erklärt den Unterschied)
 
 **Optional:**
-- Telegram Bot Token (für Self-Healing Alerts)
-- OpenRouter/Perplexity API Key (für `/research` Skill)
+- Telegram Bot Token (für Self-Healing Alerts — vollständige Einrichtungsanleitung folgt in Phase 3)
+- OpenRouter/Perplexity API Key (für `/research` Skill Deep-Tier)
+- Grafana Cloud URL + API Key (für Monitoring-Dashboards)
 - Miro Board URL (für `/visualize` Skill)
 
 ---
@@ -244,87 +260,140 @@ Claude fragt dich in Phase 0 nach folgenden Informationen:
 bootstrap/
 ├── SKILL.md                                    ← Skill-Definition (Claude liest dies)
 ├── README.md                                   ← Diese Datei
+├── GAPS.md                                     ← Gap-Analyse: was fehlt noch (internes Audit)
 ├── docs/
 │   └── diagrams/                               ← Visuelle Diagramme (Excalidraw + PNG-Exports)
-│       ├── 00-big-picture.excalidraw           ← Gesamtüberblick: 7-stufiger SDLC
-│       ├── 00-big-picture.png
-│       ├── 01-anforderungen.excalidraw         ← Phase 1: Anforderungen (/ideation)
-│       ├── 01-anforderungen.png
-│       ├── 02-design.excalidraw               ← Phase 2: Design (/architecture-review)
-│       ├── 02-design.png
-│       ├── 03-planung.excalidraw              ← Phase 3: Planung (/backlog + Spec)
-│       ├── 03-planung.png
-│       ├── 04-build.excalidraw                ← Phase 4: Build (/implement)
-│       ├── 04-build.png
-│       ├── 05-review.excalidraw               ← Phase 5: Review (Post-Validation)
-│       ├── 05-review.png
-│       ├── 06-deploy.excalidraw               ← Phase 6: Deploy (Git Push)
-│       ├── 06-deploy.png
-│       ├── 07-monitor.excalidraw              ← Phase 7: Monitor (/breakfix + /status)
-│       └── 07-monitor.png
-└── references/
-    ├── info-gathering.md                       ← Checkliste der zu sammelnden Infos
-    ├── file-templates.md                       ← config.js, CLAUDE.md, etc. Templates
-    ├── governance-template.md                  ← Vollständige GOVERNANCE.md (eingebettet, portabel)
+│       ├── 00-big-picture.excalidraw
+│       ├── 01-anforderungen.excalidraw … 07-monitor.excalidraw
+│       └── *.png                               ← Exportierte PNG-Versionen
+└── references/                                 ← Alle Templates eingebettet — keine externen Deps
+    │
+    ├── PROJEKT-SETUP
+    ├── info-gathering.md                       ← Checkliste der zu sammelnden Infos (inkl. MCP, Telegram, Grafana)
+    ├── file-templates.md                       ← config.js, CLAUDE.md, .env.example, .gitignore, .claudeignore etc.
+    ├── governance-template.md                  ← Vollständige GOVERNANCE.md (portabel, eingebettet)
+    ├── architecture-design-template.md         ← ARCHITECTURE_DESIGN.md Starter
+    │
+    ├── GOVERNANCE & HOOKS
+    ├── hooks-setup.md                          ← spec-gate.sh + doc-version-sync.sh Templates
+    ├── issue-writing-guidelines-template.md    ← Issue-Format-Richtlinien für KI + Mensch
+    │
+    ├── INFRASTRUKTUR & SERVICES
+    ├── mcp-setup.md                            ← MCP-Server einrichten (Linear, Grafana, Supabase, Hostinger …)
+    ├── telegram-setup.md                       ← Telegram Bot + Chat-ID + Linear-Webhook vollständig
+    ├── grafana-monitoring.md                   ← Grafana Cloud + Alloy + /grafana Skill Nutzungsmuster
+    │
+    ├── CODE-QUALITÄT & AGENTS
+    ├── agent-patterns.md                       ← 4 Team-Patterns als .claude/rules/ Vorlage (Lazy Loading)
+    │
+    ├── RUNTIME
     ├── self-healing-template.js                ← Self-Healing Agent Starter-Code
     ├── doc-sync-template.js                    ← Doc-Sync-Modul Starter-Code
-    ├── issue-writing-guidelines-template.md    ← Issue-Format-Richtlinien
-    ├── skills-setup.md                         ← Symlinks vs. Kopien, Reihenfolge
-    └── global-registry-update.md              ← Wie Projekt in CLAUDE.md registrieren
+    │
+    ├── SKILLS
+    ├── skills-setup.md                         ← Symlinks vs. Kopien, Reihenfolge, generierte Skills
+    ├── breakfix-template.md                    ← /breakfix Skeleton (projekt-individuell generiert)
+    ├── integration-test-template.md            ← /integration-test Skeleton
+    ├── status-template.md                      ← /status Skeleton
+    ├── wrap-up-template.md                     ← /wrap-up Skill (Session-Abschluss + Auto-Memory)
+    │
+    └── ABSCHLUSS
+        └── global-registry-update.md          ← Wie Projekt in ~/.claude/CLAUDE.md registrieren
 ```
 
 ---
 
-## Die 5 Bootstrap-Phasen
+## Die Bootstrap-Phasen
 
 | Phase | Was passiert | Eingabe nötig? |
 |-------|-------------|----------------|
-| **0 — Info-Gathering** | Claude stellt 14 Fragen zum Projekt | Ja — einmalig beantworten |
-| **1 — Grundstruktur** | Erstellt Verzeichnisse, Git, alle Kerndateien aus Templates | Bestätigung .env |
-| **2 — Skills** | Installiert/verknüpft ideation, implement, backlog etc. | Skill-Tier wählen |
-| **3 — Self-Healing** | Schreibt + testet Self-Healing + Doc-Sync | Keine |
+| **Pre-Flight** | SSH, Node.js, Obsidian-Sync-Modus prüfen | Nur bei Fehler |
+| **0a — Global Settings** | `~/.claude/settings.json` + `~/.claude/CLAUDE.md` prüfen/einrichten | Bestätigung "Global Settings OK" |
+| **0 — Info-Gathering** | Stack-Wahl + 14 Projektfragen | Ja — einmalig beantworten |
+| **1 — Grundstruktur** | Verzeichnisse, Git, Kerndateien, `.claudeignore`, Hooks, Agent-Patterns | Bestätigung .env |
+| **2 — MCP + Skills** | MCP-Server konfigurieren + Skills installieren/verknüpfen | MCP-Auswahl + Skill-Tier |
+| **3 — Self-Healing** | Self-Healing + Doc-Sync + Cron/Supercronic + Log-Rotation | Cron-Typ wählen |
 | **4 — Daemon** (optional) | Linear Automation Daemon Skeleton | Ja, wenn aktiviert |
-| **5 — Registry** | Aktualisiert globale CLAUDE.md + Memory | Keine |
+| **5 — Registry + Smoke-Test** | Globale CLAUDE.md + Memory aktualisieren + Go/No-Go Checkliste | Keine |
 
 ```mermaid
 flowchart LR
-    P0["Phase 0\n📋 Info-Gathering\n14 Fragen"] --> P1["Phase 1\n🏗️ Grundstruktur\nDateien + Git + Hooks"]
-    P1 --> P2["Phase 2\n🛠️ Skills\nideation + implement\n+ breakfix + ..."]
-    P2 --> P3["Phase 3\n🔄 Self-Healing\nVersions-Monitor + Sync"]
-    P3 --> P4["Phase 4\n⚡ Daemon\noptional"]
-    P4 --> P5["Phase 5\n🌐 Registry\nGlobale CLAUDE.md"]
-    P5 --> DONE["🚀 Bereit für\n/ideation"]
+    PF["🔍 Pre-Flight\nSSH · Node.js\nObsidian-Modus"]
+    P0A["⚙️ Phase 0a\nGlobal Settings\nautoMemory · AgentTeams\nModell-Routing · Secrets"]
+    P0["📋 Phase 0\nInfo-Gathering\nStack + 14 Fragen"]
+    P1["🏗️ Phase 1\nGrundstruktur\nDateien · Git · Hooks\n.claudeignore · Agent-Patterns"]
+    P2["🛠️ Phase 2\nMCP + Skills\nLinear · Telegram · Grafana"]
+    P3["🔄 Phase 3\nSelf-Healing\nCron · Log-Rotation\nReboot-Persistenz"]
+    P4["⚡ Phase 4\nDaemon\noptional"]
+    P5["🌐 Phase 5\nRegistry\n+ Smoke-Test"]
+    DONE["🚀 Bereit für\n/ideation"]
+
+    PF --> P0A --> P0 --> P1 --> P2 --> P3 --> P4 --> P5 --> DONE
 ```
 
 ---
 
 ## Was erstellt wird
 
-Nach `/bootstrap` hat dein Projekt:
+Nach `/bootstrap` hat dein Projekt und deine globale Umgebung:
+
+### Global (einmalig — gilt für alle Projekte)
+
+```
+~/.claude/
+├── settings.json          ← autoMemoryEnabled + Agent Teams + Permissions
+└── CLAUDE.md              ← Modell-Routing, Agent-Strategie, Secrets-Policy
+```
+
+### Im Projekt
 
 ```
 mein-projekt/
 ├── lib/
 │   ├── config.js          ← VERSION + DOC_FILES — einzige Wahrheitsquelle
-│   └── doc-sync.js        ← Synchronisiert Versionen in alle Docs + Obsidian
+│   └── doc-sync.js        ← Synchronisiert alle Docs + Obsidian Vault
 ├── agents/
-│   └── self-healing.js    ← Cron-fähiger Gesundheitsmonitor (alle 15 Min)
-├── CLAUDE.md              ← Claude's Identität, Fähigkeiten, Regeln
-├── SYSTEM_ARCHITECTURE.md ← Architektur-Dok (beim Wachsen des Systems ausfüllen)
+│   └── self-healing.js    ← Cron-Gesundheitsmonitor (alle 15 Min)
+│
+├── CLAUDE.md              ← Projekt-Identität, Regeln, Quick-Referenz
+├── CLAUDE.local.md        ← Persönliche Overrides (gitignored)
+├── ARCHITECTURE_DESIGN.md ← Einstiegsdokument für Architekturentscheidungen
+├── SYSTEM_ARCHITECTURE.md ← Komponenten, Datenfluss, externe Abhängigkeiten
 ├── COMPONENT_INVENTORY.md ← Datei-Inventar (Self-Healing prüft dies)
-├── DEVELOPMENT_PROCESS.md ← Wie in diesem Projekt entwickelt wird
-├── GOVERNANCE.md          ← Das vollständige Governance-Blueprint
-├── SECURITY.md            ← API Key-Richtlinie, Bedrohungsmodell
-├── CHANGELOG.md           ← Automatisch aktualisiert durch doc-sync
-├── .env                   ← Deine API Keys (gitignored)
-├── .env.example           ← Variablen-Namen ohne Werte
+├── GOVERNANCE.md          ← Vollständiges Governance-Blueprint
+├── DEVELOPMENT_PROCESS.md ← Entwicklungsprozess für dieses Projekt
+├── SECURITY.md            ← API Key-Policy, Bedrohungsmodell
+├── CHANGELOG.md           ← Auto-aktualisiert durch doc-sync
+├── API_INVENTORY.md       ← Alle externen APIs dokumentiert
+├── INDEX.md               ← Docs-Index (Claude navigiert damit)
+├── PROCESS_CATALOG.md     ← Alle Prozesse und Workflows
+│
+├── .env                   ← API Keys (gitignored)
+├── .env.example           ← Format-Erklärungen für jeden Key (nie echte Keys!)
+├── .gitignore             ← inkl. .env, CLAUDE.local.md, node_modules
+├── .claudeignore          ← Kontextschutz: node_modules, .env, Logs (Claude liest diese nie)
+│
+├── specs/
+│   └── TEMPLATE.md        ← Story-Template mit Agent-Pattern, DB-Impact, Rollback
+├── journal/
+│   ├── STRATEGY_LOG.md    ← Pflichtlektüre vor /ideation — verhindert Wiederholungen
+│   └── LEARNINGS.md       ← Outcome-Tracking nach Issue-Close
+│
 └── .claude/
+    ├── settings.json      ← Projekt-Permissions + Hooks (spec-gate, guard, format, Stop)
     ├── ISSUE_WRITING_GUIDELINES.md
+    ├── hooks/
+    │   ├── spec-gate.sh           ← Blockiert Commit ohne Spec-File
+    │   ├── doc-version-sync.sh    ← Blockiert Push bei Versions-Drift
+    │   ├── guard.sh               ← Blockiert Zugriff auf .env + Schlüsseldateien
+    │   └── format.sh              ← Auto-Format nach Edit/Write (Biome/Black)
+    ├── rules/
+    │   └── agent-patterns.md      ← 4 Team-Patterns, Lazy Loading (0 Token-Overhead)
     └── skills/
         ├── ideation/      → Symlink oder Kopie
         ├── implement/     → Symlink oder Kopie
         ├── backlog/       → Symlink oder Kopie
-        └── ...
+        └── ...            → je nach gewähltem Skill-Tier
 ```
 
 ---
