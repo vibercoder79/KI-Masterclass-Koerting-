@@ -3,28 +3,6 @@
 Alle diese Informationen VOR dem Setup vom Operator einsammeln.
 Felder mit * sind Pflicht. Optionale Felder können später ergänzt werden.
 
-## Pre-Flight Checklist (vor Phase 0)
-
-Diese Punkte müssen ERFÜLLT sein bevor Bootstrap startet:
-
-| Check | Befehl | Erwartet |
-|-------|--------|----------|
-| **SSH zu GitHub** | `ssh -T git@github.com` | `Hi username!...authenticated` |
-| **Node.js installiert** | `node --version` | `v18.x` oder höher |
-| **GitHub Repo existiert** | (manuell prüfen) | Leeres oder bestehendes Repo |
-| **Git konfiguriert** | `git config user.email` | Deine E-Mail-Adresse |
-
-**SSH-Zugang ist Voraussetzung für `git push`.**
-Bootstrap führt am Ende automatisch `git push origin main` aus —
-ohne SSH schlägt das fehl, egal ob Mac, PC, VPS oder Claude Code Desktop.
-
-Wo SSH eingerichtet wird:
-- **Mac/PC lokal:** `~/.ssh/` — Key in GitHub Settings hinterlegen
-- **VPS/Server:** gleicher Prozess, auf dem Server ausführen
-- **Claude Code Desktop:** nutzt SSH-Agenten des Systems — `ssh -add ~/.ssh/id_ed25519` falls nötig
-
-Details: siehe `bootstrap/README.md` Sektion "SSH-Zugang zu GitHub einrichten".
-
 ## Pflicht-Informationen
 
 | Variable | Frage an Operator | Beispiel |
@@ -38,51 +16,14 @@ Details: siehe `bootstrap/README.md` Sektion "SSH-Zugang zu GitHub einrichten".
 | `VERSION_START` * | Start-Version | `1.0.0` |
 | `OBSIDIAN_VAULT` * | Absoluter Pfad zum Obsidian Vault | `/root/myvault/` |
 
-## Erfolgsmetriken (Pflicht — schließt den Learning-Loop)
-
-> **Warum Pflicht?** Ohne diese 3 Felder kann Claude nicht beurteilen ob eine Story "gut" war.
-> Sie fließen in CLAUDE.md §2 (Proaktive Pflicht), specs/TEMPLATE.md (Erwarteter Outcome)
-> und journal/LEARNINGS.md (Baseline Tag 0) ein.
-
-| Variable | Frage an Operator | Beispiel |
-|----------|------------------|---------|
-| `METRIC_PRIMARY` * | Was ist deine **primäre Erfolgsmetrik**? Ein Wort oder kurzer Begriff. | `WinRate`, `Conversion Rate`, `API-Latenz`, `Deploy-Zeit`, `Fehlerrate` |
-| `METRIC_BASELINE` * | Was ist der **aktuelle Wert** dieser Metrik heute? | `33%`, `800ms`, `2.4%`, `45 Min` |
-| `METRIC_TARGET` * | Was gilt als **Erfolg**? Zielwert der angestrebt wird. | `> 45%`, `< 200ms`, `> 5%`, `< 10 Min` |
-
-**Claude setzt diese Werte ein in:**
-1. `CLAUDE.md §2` → "Verbessert das {{METRIC_PRIMARY}}?" als Proaktive Pflicht
-2. `specs/TEMPLATE.md` → `## Erwarteter Outcome` vorausgefüllt mit {{METRIC_PRIMARY}}
-3. `journal/LEARNINGS.md` → Baseline-Eintrag bei Setup: "Tag 0: {{METRIC_PRIMARY}} = {{METRIC_BASELINE}}"
-4. Outcome-Check nach Issue-Close: War {{METRIC_TARGET}} erreicht?
-
 ## Optionale Informationen
 
-| Variable | Frage an Operator | Default | Anleitung |
-|----------|------------------|---------|-----------|
-| `TELEGRAM_BOT_TOKEN` | Telegram Bot Token für Alerts? | — (skip) | `references/telegram-setup.md` |
-| `TELEGRAM_CHAT_ID` | Telegram Chat-ID (persönlich oder Gruppe)? | — | `references/telegram-setup.md` |
-| `TELEGRAM_LINEAR_WEBHOOK` | Linear-Webhook → Telegram Notifications? (Ja/Nein) | Nein | `references/telegram-setup.md §5` |
-| `GRAFANA_ENABLED` | Grafana Cloud für Monitoring? (Ja/Nein) | Nein | `references/grafana-monitoring.md` |
-| `GRAFANA_URL` | Grafana Cloud URL (wenn Ja)? | — | `references/grafana-monitoring.md` |
-| `GRAFANA_API_KEY` | Grafana API Key (wenn Ja)? | — | `references/grafana-monitoring.md` |
-| `OPENROUTER_API_KEY` | OpenRouter API Key für Deep Research? | — (Perplexity alternativ) | — |
-| `MIRO_BOARD_URL` | Miro Board URL für /visualize? | — (skip) | — |
-| `DAEMON_ENABLED` | Automation Daemon einrichten? (Ja/Nein) | Nein | Phase 4 in SKILL.md |
-
-## MCP-Server (bestimmt Settings-Konfiguration)
-
-Welche externen Dienste soll Claude Code direkt ansprechen?
-Vollstaendige Auswahlliste und Einrichtungsanleitung: `references/mcp-setup.md §1`
-
-Pflicht-Auswahl fuer Governance:
-- Linear (fast immer noetig — Issue Tracking)
-
-Haeufig genutzt:
-- Telegram (via Bot API — kein MCP, aber settings.json permissions)
-- Grafana (wenn GRAFANA_ENABLED = Ja)
-- Hostinger (wenn VPS-Management gewuenscht)
-- Supabase (wenn Supabase als Datenbank)
+| Variable | Frage an Operator | Default |
+|----------|------------------|---------|
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot Token für Alerts? | — (skip) |
+| `PERPLEXITY_API_KEY` | Perplexity API Key für Deep Research? | — (OPENROUTER_API_KEY alternativ) |
+| `MIRO_BOARD_URL` | Miro Board URL für /visualize? | — (skip) |
+| `DAEMON_ENABLED` | Automation Daemon einrichten? (Ja/Nein) | Nein |
 
 ## Architektur-Dimensionen
 
@@ -101,30 +42,32 @@ Optional je nach Domäne:
 
 Welche Skills sollen installiert werden?
 
-**Generische Skills (Symlink — keine Anpassung nötig):**
-- [ ] /ideation (empfohlen)
-- [ ] /implement (empfohlen)
-- [ ] /backlog (empfohlen)
-- [ ] /wrap-up (empfohlen — Session-Abschluss + Auto-Memory)
+**Minimum:**
+- [ ] /ideation
+- [ ] /implement
+- [ ] /backlog
+
+**Standard (empfohlen):**
 - [ ] /architecture-review
 - [ ] /sprint-review
-- [ ] /research (benötigt OPENROUTER_API_KEY für Deep-Tier via Perplexity)
-- [ ] /excalidraw-diagram (Architektur-Diagramme als Excalidraw JSON — keine Deps)
-- [ ] /cloud-system-engineer (nur wenn Hostinger VPS + MCP Server eingerichtet)
-- [ ] /notebooklm (benötigt notebooklm-py CLI — `pip install notebooklm-py`)
-- [ ] /visualize (nur wenn Miro MCP + MIRO_ACCESS_TOKEN vorhanden)
+- [ ] /research
+- [ ] /breakfix
+- [ ] /wrap-up
+
+**Voll:**
+- [ ] /integration-test (nur wenn Integrationstests gepflegt werden sollen)
+- [ ] /status (nur bei Daemon/Agent-Systemen)
+- [ ] /grafana (nur wenn Grafana genutzt wird)
+- [ ] /cloud-system-engineer (nur wenn Hostinger VPS genutzt wird)
+- [ ] /visualize (nur wenn Miro genutzt wird)
 - [ ] /skill-creator
 
-**Projekt-spezifische Skills (werden vom Bootstrap generiert — Fragen werden gestellt):**
-- [ ] /breakfix — Incident Response mit projekt-spezifischen Diagnose-Checks
-  → Bootstrap fragt: Issue-Prefix, Incident-Verzeichnis, Daemons, Log-Files
-- [ ] /integration-test — System-Integrationstests nach /implement
-  → Bootstrap fragt: Tier-1 Checks, Tier-2 Checks, Post-Implement Auto-Run
-- [ ] /status — System Status Dashboard
-  → Bootstrap fragt: Daemons, Signal-Files, Dashboard-URL, Log-Files
+## Agent-Pattern Check
 
-**Hinweis:** calibrate, briefing-dieter, grafana sind zu domain-spezifisch
-und werden NICHT generisch angeboten. Bei Bedarf manuell aufbauen (→ /skill-creator).
+Wenn das Projekt autonome Agents beinhaltet:
+- Braucht jeder Agent eine Signal-File? → Ja: SIGNAL_TO_AGENT Map in self-healing.js pflegen
+- Brauchen Agents Start-Scripts? → Ja: `agents/xxx-start.sh` mit flock + PID anlegen
+- Braucht das Projekt Weight-Optimierung? → Nur bei ML/Signal-Systemen
 
 ## Label-Taxonomie
 
@@ -136,3 +79,12 @@ Domain-spezifisch ergänzen (Beispiele):
 - Trading: `agents`, `signals`, `risk`, `broker`
 - Analytics: `pipeline`, `dashboard`, `data-quality`
 - Web-App: `frontend`, `backend`, `api`, `ux`
+- KI-System: `model`, `prompt`, `evaluation`, `data`
+
+## Hooks-Konfiguration
+
+Governance-Hooks werden automatisch in Phase 1 installiert.
+Keine weitere Konfiguration nötig ausser WORKSPACE-Pfad und ISSUE_PREFIX in den Hook-Scripts.
+
+Der SIGNAL_TO_AGENT-Check in spec-gate.sh ist CLAW-spezifisch (docker exec + SQLite).
+Für andere Projekte diesen Block weglassen — die restlichen 4 Checks reichen.

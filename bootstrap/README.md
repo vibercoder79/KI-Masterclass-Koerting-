@@ -7,6 +7,14 @@
 
 ---
 
+## Big Picture
+
+![Bootstrap Skill — 5-Phasen-Übersicht](docs/bootstrap-big-picture.png)
+
+*5 Phasen vom leeren Ordner zum governance-ready Projekt — mit Governance-Hooks, Skill-Set, Self-Healing-Monitor und globalem Registry-Eintrag. [Excalidraw-Quelldatei](docs/bootstrap-big-picture.excalidraw)*
+
+---
+
 ## Warum dieses Framework?
 
 Die meisten AI-Development-Frameworks sind entweder zu viel Automation (Black Box, kein Traceability) oder zu wenig Struktur (Cursor-Rules ohne Governance). Dieses Framework trifft den Sweet Spot:

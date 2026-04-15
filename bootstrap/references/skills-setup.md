@@ -5,24 +5,51 @@
 Alle Skills liegen global unter `/root/.claude/skills/`. Für ein neues Projekt werden sie
 in das Projekt-Verzeichnis unter `.claude/skills/` verlinkt oder kopiert.
 
+## Verfügbare Skills (Stand v2.0)
+
+| Skill | Beschreibung | Stufe |
+|-------|-------------|-------|
+| `ideation` | Deep Research + User Story Erstellung | Minimum |
+| `implement` | 10-Schritte-Implementierungs-Workflow | Minimum |
+| `backlog` | Sprint Planning + Backlog-Übersicht | Minimum |
+| `architecture-review` | 8-Dimensionen Architektur-Review | Standard |
+| `sprint-review` | Quartals-Audit + Tech Debt | Standard |
+| `research` | Deep Research via WebSearch + Perplexity | Standard |
+| `breakfix` | Incident Response 7-Schritte-Workflow | Standard |
+| `wrap-up` | Session-Abschluss + Auto-Memory | Standard |
+| `integration-test` | Integrationstests Tier-1/Tier-2 | Voll |
+| `status` | System-Status-Dashboard on demand | Voll |
+| `grafana` | Grafana Dashboard-Entwicklung | Voll |
+| `cloud-system-engineer` | VPS-Infrastruktur (Hostinger) | Voll |
+| `visualize` | Architektur-Diagramme in Miro | Voll |
+| `skill-creator` | Neue Skills erstellen + paketieren | Voll |
+| `excalidraw-diagram` | Visuelle Diagramme als Excalidraw-JSON | Optional |
+| `supabase` | Supabase DB Management via MCP | Optional |
+| `vercel` | Vercel Deployment Management | Optional |
+
 ## Strategie: Symlink vs. Kopie
 
 **Empfehlung: Symlink für generische Skills**
 ```bash
 # Im Projekt-Verzeichnis
 mkdir -p .claude/skills
+
+# Minimum
 ln -s /root/.claude/skills/ideation .claude/skills/ideation
 ln -s /root/.claude/skills/implement .claude/skills/implement
 ln -s /root/.claude/skills/backlog .claude/skills/backlog
+
+# Standard (zusätzlich)
 ln -s /root/.claude/skills/architecture-review .claude/skills/architecture-review
 ln -s /root/.claude/skills/sprint-review .claude/skills/sprint-review
 ln -s /root/.claude/skills/research .claude/skills/research
+ln -s /root/.claude/skills/breakfix .claude/skills/breakfix
 ln -s /root/.claude/skills/wrap-up .claude/skills/wrap-up
+
+# Voll (zusätzlich)
+ln -s /root/.claude/skills/integration-test .claude/skills/integration-test
 ln -s /root/.claude/skills/skill-creator .claude/skills/skill-creator
-# Optional:
 ln -s /root/.claude/skills/cloud-system-engineer .claude/skills/cloud-system-engineer
-ln -s /root/.claude/skills/excalidraw-diagram .claude/skills/excalidraw-diagram
-ln -s /root/.claude/skills/notebooklm .claude/skills/notebooklm
 ln -s /root/.claude/skills/visualize .claude/skills/visualize
 ```
 
@@ -43,70 +70,60 @@ Diese Referenz-Dateien MÜSSEN nach dem Kopieren projektspezifisch angepasst wer
 | `ideation/references/story-template-feature.md` | Domain-spezifische Sektionen |
 | `ideation/references/architecture-dimensions.md` | Relevante Dimensionen auswählen/ergänzen |
 | `implement/references/change-checklist.md` | Spezial-Checklisten (z.B. "Neuer Agent") |
-| `backlog/SKILL.md` | Linear Team-Name + Issue-Prefix |
-| `wrap-up/SKILL.md` | Memory-Pfad + Projekt-spezifische Synthese-Hinweise |
+| `backlog/skill.md` | Linear Team-Name + Issue-Prefix |
 
-## Projekt-spezifische Skills (werden generiert, nicht kopiert)
+## implement-Skill: Pflichtschritte (v2.0)
 
-Diese Skills werden vom Bootstrap-Skill mit interaktiven Fragen generiert.
-Sie haben KEINE Quell-Kopie in `/root/.claude/skills/` — sie entstehen neu für jedes Projekt.
+Der aktuelle implement-Skill enthält diese neuen Pflichtschritte:
 
-| Skill | Template | Was Bootstrap fragt |
-|-------|----------|---------------------|
-| `/breakfix` | `bootstrap/references/breakfix-template.md` | Issue-Prefix, Incident-Dir, Daemons, Logs |
-| `/integration-test` | `bootstrap/references/integration-test-template.md` | Tier-1/2 Checks, Post-Implement? |
-| `/status` | `bootstrap/references/status-template.md` | Daemons, Signal-Files, Dashboard, Logs |
+| Schritt | Was | Governance-Impact |
+|---------|-----|------------------|
+| **1b** | Agent-Pattern-Deklaration | Vor Code-Änderung, in Spec eintragen |
+| **3b** | Governance-Validation-Checklist | 8 Dimensionen + Security prüfen |
+| **5** | Doc-Impact-Ausführung | Neue Datei → 5-Punkt-Checkliste |
+| **6a** | ESLint-Check | 0 Errors Pflicht, Warnings dokumentieren |
 
-**Workflow für jeden generierten Skill:**
-1. Bootstrap liest Template-Datei
-2. Bootstrap stellt die dort definierten Fragen
-3. Bootstrap schreibt `{PROJECT_PATH}/.claude/skills/{skill}/SKILL.md` mit Platzhaltern befüllt
-4. Skill enthält `## TODO`-Sektion für weitere Konkretisierung nach System-Aufbau
+## wrap-up-Skill: Wann verwenden
 
-**calibrate:** Wird NICHT generiert — zu domain-spezifisch (Scoring/Gewichtungs-Kalibrierung).
-Bei Bedarf: manuell als neuen Skill aufbauen (→ `/skill-creator`).
+**PFLICHT** bei Session-Ende ("Exit", "Tschüss", "Ende", "fertig"):
+- Session-Zusammenfassung erstellen
+- Memory-Einträge schreiben
+- Offene Punkte dokumentieren
 
-## Optionale Skills mit Voraussetzungen
+## breakfix-Skill: Incident-Prozess
 
-| Skill | Voraussetzung | Wofür |
-|-------|---------------|-------|
-| `research` | `OPENROUTER_API_KEY` (OpenRouter-Account) | Deep Research via Perplexity |
-| `cloud-system-engineer` | Hostinger MCP Server (`npx @hostinger/mcp-server`) | VPS-Infrastruktur via Hostinger |
-| `excalidraw-diagram` | keine | Architektur-Diagramme als Excalidraw JSON |
-| `notebooklm` | `notebooklm-py` CLI installiert (`pip install notebooklm-py`) | Google NotebookLM Automation |
-| `visualize` | Miro MCP Server + MIRO_ACCESS_TOKEN | Architektur-Diagramme in Miro |
-| `grafana` | Grafana MCP Server + GRAFANA_URL + GRAFANA_API_KEY | Dashboard-Entwicklung in Grafana Cloud |
-
-**Hostinger MCP Setup** (für cloud-system-engineer):
-```bash
-# In Claude Code settings.json:
-{
-  "mcpServers": {
-    "hostinger-mcp": {
-      "command": "npx",
-      "args": ["-y", "@hostinger/mcp-server"],
-      "env": { "HOSTINGER_API_KEY": "your_api_key" }
-    }
-  }
-}
-```
+7-Schritte-Workflow: Detect → Diagnose → Fix → Verify → Document → Prevent → CLAUDE.md-Regel
+**Nach jedem /breakfix:** "Welche CLAUDE.md-Regel hätte diesen Incident verhindert?" → Regel ergänzen.
 
 ## .claude/ISSUE_WRITING_GUIDELINES.md
 
 Diese Datei ist nicht Teil eines Skills, muss direkt erstellt werden:
-- Vorlage liegt im Bootstrap-Skill: `bootstrap/references/issue-writing-guidelines-template.md`
-- Bootstrap Phase 1 schreibt sie automatisch nach `{PROJECT_PATH}/.claude/ISSUE_WRITING_GUIDELINES.md`
-- Passe auf Projekt-Domain an
+- Kopiere aus `/docker/openclaw-aolv/data/.openclaw/workspace/trading/.claude/ISSUE_WRITING_GUIDELINES.md`
+- Passe auf Projekt-Domain an (Issue-Prefix, Terminologie)
 
-## settings.json — Skill-Aktivierung
+## settings.json — Hooks + Permissions
 
-Skills werden automatisch durch Claude Code geladen wenn sie unter `.claude/skills/` liegen.
-Keine manuelle Registrierung nötig.
-
-Aber: Für den Automation Daemon werden extra Permissions benötigt:
+Für den Automation Daemon und korrekte Hook-Ausführung:
 ```json
-// /root/.claude/settings.json
+// {PROJECT_PATH}/.claude/settings.json
 {
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash {PROJECT_PATH}/.claude/hooks/spec-gate.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash {PROJECT_PATH}/.claude/hooks/doc-version-sync.sh"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(git:*)",
@@ -120,18 +137,15 @@ Aber: Für den Automation Daemon werden extra Permissions benötigt:
 
 ## Reihenfolge der Skill-Installation (nach Abhängigkeit)
 
-1. `/research` — keine Abhängigkeiten (benötigt OPENROUTER_API_KEY für Deep Tier)
+1. `/research` — keine Abhängigkeiten
 2. `/ideation` — benötigt story-templates + Linear
 3. `/backlog` — benötigt Linear
 4. `/implement` — benötigt change-checklist + git
-5. `/architecture-review` — benötigt dimensions-definition
-6. `/wrap-up` — benötigt Memory-Pfad (wird bei Session-Ende aufgerufen)
-7. `/breakfix` — wird generiert: Issue-Prefix, Incident-Dir, Logs
-8. `/integration-test` — wird generiert: Tier-Checks definieren
-9. `/status` — wird generiert: Daemons + Dashboard definieren
-10. `/cloud-system-engineer` — benötigt Hostinger MCP (optional)
-11. `/excalidraw-diagram` — standalone, keine Voraussetzungen
-12. `/notebooklm` — benötigt notebooklm-py CLI
-13. `/sprint-review` — benötigt alle anderen
-14. `/visualize` — benötigt Miro Token + MCP
-15. `/skill-creator` — standalone
+5. `/breakfix` — benötigt git + Linear (empfohlen nach implement)
+6. `/wrap-up` — standalone (empfohlen früh installieren)
+7. `/architecture-review` — benötigt dimensions-definition
+8. `/integration-test` — benötigt Projekt-Checks (muss angepasst werden)
+9. `/cloud-system-engineer` — benötigt Hostinger MCP (falls genutzt)
+10. `/sprint-review` — benötigt alle anderen
+11. `/visualize` — benötigt Miro Token
+12. `/skill-creator` — standalone

@@ -53,6 +53,10 @@ type: project
 ### Installierte Skills
 [Liste der installierten Skills]
 
+### Governance-Hooks
+- spec-gate.sh: aktiv (blockiert Commits ohne Spec-File + Agent-Pattern)
+- doc-version-sync.sh: aktiv (blockiert VERSION-Bump ohne Doku-Sync)
+
 ### Ausstehend
 [Was noch fehlt / geplant ist]
 ```
@@ -61,6 +65,7 @@ type: project
 
 ```bash
 # Prüfen ob alle Einträge korrekt sind
-cat /root/.claude/CLAUDE.md | grep "PROJECT_NAME"
-cat /root/.claude/projects/-root/memory/MEMORY.md | grep "PROJECT_NAME"
+cat /root/.claude/CLAUDE.md | grep "{{PROJECT_NAME}}"
+cat /root/.claude/projects/-root/memory/MEMORY.md | grep "{{PROJECT_NAME}}"
+ls /root/.claude/projects/-root/memory/ | grep "{{project_slug}}"
 ```
