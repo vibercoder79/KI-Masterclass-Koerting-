@@ -48,6 +48,7 @@ Listed in the order you'd typically use them in a development cycle.
 | **[cloud-system-engineer](cloud-system-engineer/)** | `/cloud-system-engineer` | VPS/Docker infrastructure: health checks, firewall, DNS, resources. Usable as a teammate in agent teams. |
 | **[visualize](visualize/)** | `/visualize` | Generate architecture diagrams in Miro from existing documentation files. |
 | **[skill-creator](skill-creator/)** | `/skill-creator` | Create, package and register new skills into the global registry. |
+| **[design-md-generator](design-md-generator/)** | `/design-md-generator` | Extracts a website's visual design system into a machine-readable DESIGN.md (Google Stitch format) + HTML previews. |
 
 ---
 
@@ -142,6 +143,7 @@ In der Reihenfolge des typischen Einsatzes im Entwicklungs-Workflow.
 | **[cloud-system-engineer](cloud-system-engineer/)** | `/cloud-system-engineer` | VPS/Docker-Infrastruktur: Health-Check, Firewall, DNS, Ressourcen. Als Teammate in Agent-Teams einsetzbar. |
 | **[visualize](visualize/)** | `/visualize` | Architektur-Diagramme in Miro aus bestehenden Doku-Dateien generieren. |
 | **[skill-creator](skill-creator/)** | `/skill-creator` | Neue Skills erstellen, paketieren und in die globale Registry einbinden. |
+| **[design-md-generator](design-md-generator/)** | `/design-md-generator` | Extrahiert das visuelle Design-System einer Website als maschinenlesbare DESIGN.md (Google-Stitch-Format) + HTML-Previews. |
 
 ---
 

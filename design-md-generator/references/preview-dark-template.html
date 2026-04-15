@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DESIGN.md Preview (Dark) — {{SITE_NAME}}</title>
+<style>
+  /* === TEMPLATE-VARIABLEN (werden durch extrahierte Werte ersetzt) === */
+  :root {
+    /* Farben — Dark Mode: Hintergrund und Text invertiert */
+    --primary: {{PRIMARY_COLOR}};
+    --secondary: {{SECONDARY_COLOR}};
+    --accent: {{ACCENT_COLOR}};
+    --background: {{DARK_BG_COLOR}};       /* z.B. #1a1a1a oder aus dem Design */
+    --text: {{DARK_TEXT_COLOR}};            /* z.B. #f0f0f0 */
+    --text-secondary: {{DARK_TEXT_SECONDARY}}; /* z.B. #999 */
+    --border: {{DARK_BORDER_COLOR}};       /* z.B. #333 */
+    --surface: {{DARK_SURFACE_COLOR}};     /* z.B. #222 */
+
+    /* Typografie */
+    --font-heading: {{FONT_HEADING}};
+    --font-body: {{FONT_BODY}};
+
+    /* Spacing */
+    --radius-sm: {{RADIUS_SM}};
+    --radius-md: {{RADIUS_MD}};
+    --radius-lg: {{RADIUS_LG}};
+  }
+
+  /* === LAYOUT === */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--background);
+    color: var(--text);
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  h1 { font-family: var(--font-heading); font-size: 2rem; margin-bottom: .5rem; }
+  h2 { font-family: var(--font-heading); font-size: 1.25rem; margin: 2.5rem 0 1rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; }
+  .subtitle { color: var(--text-secondary); font-size: .875rem; margin-bottom: 2rem; }
+  .mode-badge { display: inline-block; background: var(--surface); border: 1px solid var(--border); padding: .15rem .5rem; border-radius: 4px; font-size: .7rem; color: var(--text-secondary); margin-left: .5rem; vertical-align: middle; }
+
+  /* === COLOR SWATCHES === */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+  .swatch { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+  .swatch-color { height: 80px; }
+  .swatch-info { padding: .5rem .75rem; font-size: .75rem; background: var(--surface); }
+  .swatch-name { font-weight: 600; margin-bottom: .15rem; }
+  .swatch-hex { color: var(--text-secondary); font-family: monospace; }
+
+  /* === TYPOGRAPHY === */
+  .type-scale { display: flex; flex-direction: column; gap: 1rem; }
+  .type-row { display: flex; align-items: baseline; gap: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: .75rem; }
+  .type-meta { min-width: 180px; font-size: .75rem; color: var(--text-secondary); font-family: monospace; }
+  .type-sample { flex: 1; }
+
+  /* === BUTTONS === */
+  .buttons { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+  .btn {
+    display: inline-block; padding: .5rem 1.25rem; border-radius: var(--radius-sm);
+    font-family: var(--font-body); font-size: .875rem; font-weight: 500;
+    text-decoration: none; cursor: pointer; border: none; transition: all .15s;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--accent); }
+
+  /* === CARDS === */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .card {
+    background: var(--surface); border-radius: var(--radius-md);
+    padding: 1.5rem; border: 1px solid var(--border);
+  }
+  .card-elevated { box-shadow: {{SHADOW_CARD_DARK}}; border: none; }
+  .card h3 { font-family: var(--font-heading); font-size: 1rem; margin-bottom: .5rem; }
+  .card p { font-size: .875rem; color: var(--text-secondary); }
+
+  /* === SHADOWS === */
+  .shadows { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+  .shadow-box {
+    background: var(--surface); border-radius: var(--radius-md);
+    padding: 1.5rem; text-align: center; height: 100px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .shadow-label { font-size: .75rem; color: var(--text-secondary); margin-top: .5rem; }
+
+  /* === SPACING === */
+  .spacing-scale { display: flex; flex-direction: column; gap: .5rem; }
+  .spacing-row { display: flex; align-items: center; gap: 1rem; }
+  .spacing-bar { height: 24px; background: var(--accent); border-radius: 2px; opacity: .4; }
+  .spacing-meta { font-size: .75rem; color: var(--text-secondary); font-family: monospace; min-width: 80px; }
+
+  /* === RADIUS === */
+  .radii { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+  .radius-box {
+    width: 80px; height: 80px; background: var(--surface);
+    border: 2px solid var(--accent); display: flex; align-items: center;
+    justify-content: center; font-size: .7rem; color: var(--text-secondary);
+    font-family: monospace;
+  }
+
+  /* === CONTRAST CHECK === */
+  .contrast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+  .contrast-box { padding: 1rem; border-radius: var(--radius-sm); font-size: .875rem; }
+  .contrast-label { font-size: .7rem; font-family: monospace; margin-top: .25rem; opacity: .7; }
+
+  /* === FOOTER === */
+  .footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: .75rem; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<h1>{{SITE_NAME}} — Design System Preview <span class="mode-badge">DARK</span></h1>
+<p class="subtitle">Dark-Mode-Variante — Zeigt ob das Design-System auf dunklen Oberflaechen funktioniert</p>
+
+<!-- ========== FARBEN ========== -->
+<h2>Farbpalette auf dunklem Hintergrund</h2>
+<div class="swatches">
+  <!-- TEMPLATE: Gleiche Farben wie Light-Version, aber auf dunklem Hintergrund -->
+</div>
+
+<!-- ========== KONTRAST-CHECK ========== -->
+<h2>Kontrast-Check</h2>
+<p class="subtitle" style="margin-top: -0.5rem">Zeigt ob Textfarben auf dunklen Oberflaechen lesbar sind</p>
+<div class="contrast-grid">
+  <!-- TEMPLATE: Text auf verschiedenen dunklen Hintergruenden -->
+  <!--
+  <div class="contrast-box" style="background: #222; color: #f0f0f0">
+    Primaertext auf Surface
+    <div class="contrast-label">#f0f0f0 auf #222</div>
+  </div>
+  <div class="contrast-box" style="background: #222; color: #999">
+    Sekundaertext auf Surface
+    <div class="contrast-label">#999 auf #222</div>
+  </div>
+  <div class="contrast-box" style="background: #1a1a1a; color: #d77f11">
+    Akzentfarbe auf Background
+    <div class="contrast-label">#d77f11 auf #1a1a1a</div>
+  </div>
+  -->
+</div>
+
+<!-- ========== TYPOGRAFIE ========== -->
+<h2>Typografie-Skala</h2>
+<div class="type-scale">
+  <!-- TEMPLATE: Gleiche Hierarchie wie Light-Version -->
+</div>
+
+<!-- ========== BUTTONS ========== -->
+<h2>Buttons</h2>
+<div class="buttons">
+  <!-- TEMPLATE: Buttons auf dunklem Hintergrund -->
+</div>
+
+<!-- ========== CARDS ========== -->
+<h2>Cards</h2>
+<div class="cards">
+  <!-- TEMPLATE: Cards auf dunklem Hintergrund -->
+</div>
+
+<!-- ========== SHADOWS ========== -->
+<h2>Shadow-System auf dunklen Oberflaechen</h2>
+<div class="shadows">
+  <!-- TEMPLATE: Shadows sind auf dunklem Hintergrund anders sichtbar -->
+</div>
+
+<!-- ========== SPACING ========== -->
+<h2>Spacing-Skala</h2>
+<div class="spacing-scale">
+  <!-- TEMPLATE: Gleiche Skala wie Light-Version -->
+</div>
+
+<!-- ========== BORDER RADIUS ========== -->
+<h2>Border Radius</h2>
+<div class="radii">
+  <!-- TEMPLATE: Gleiche Radien wie Light-Version -->
+</div>
+
+<div class="footer">
+  Generiert mit design-md-generator (Dark Mode Preview) — {{DATE}}
+</div>
+
+</body>
+</html>
