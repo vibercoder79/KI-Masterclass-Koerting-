@@ -1,14 +1,18 @@
 # DESIGN.md Format-Referenz
 
-Eine DESIGN.md hat exakt 9 Abschnitte. Jeder Abschnitt hat einen festen Zweck.
+Eine DESIGN.md hat exakt 10 Abschnitte. Jeder Abschnitt hat einen festen Zweck.
+Zusaetzlich wird eine eigenstaendige DESIGN-DARK.md mit denselben 10 Abschnitten generiert.
 
 ## Abschnitt-Struktur
 
 ### 1. Visual Theme & Atmosphere
-- Gesamteindruck der Website in 2-3 Absaetzen beschreiben
+- Gesamteindruck der Website in 2-3 Absaetzen ARGUMENTATIV beschreiben
 - Philosophie hinter dem Design erklaeren (nicht nur "es ist dunkel", sondern WARUM)
+- Jede Design-Entscheidung als bewusste Wahl erklaeren, nicht nur auflisten
 - **Key Characteristics** als Bullet-Liste: 6-10 konkrete, messbare Merkmale
 - CSS-Werte in Klammern angeben: `(#171717)`, `(-2.4px)`, `(box-shadow: ...)`
+- **Page Rhythm** als explizites Muster: Welche Sektionstypen wechseln sich ab?
+  z.B. "Dark Hero → Cream Body → Dark Interstitial → Cream Feature → Photo → Dark Footer"
 
 ### 2. Color Palette & Roles
 - Farben in Kategorien gruppieren: Primary, Accent, Interactive, Neutral Scale, Surface & Overlay, Shadows
@@ -18,6 +22,8 @@ Eine DESIGN.md hat exakt 9 Abschnitte. Jeder Abschnitt hat einen festen Zweck.
 
 ### 3. Typography Rules
 - Font Family mit Fallbacks
+- **Font-Substitute-Empfehlungen** fuer proprietaere Fonts: 3-4 Open-Source-Alternativen
+  mit Hinweis auf Metrics-Unterschiede (z.B. "line-height ~0.95 statt 1.00 noetig")
 - Hierarchie-Tabelle mit Spalten: Role | Font | Size | Weight | Line Height | Letter Spacing | Notes
 - Mindestens 10-15 Hierarchie-Stufen (Display, Heading, Body, Caption, Mono etc.)
 - Principles: 3-4 Regeln die die Typografie-Philosophie erklaeren
@@ -58,6 +64,14 @@ Eine DESIGN.md hat exakt 9 Abschnitte. Jeder Abschnitt hat einen festen Zweck.
 - 4-5 Example Component Prompts (Copy-Paste-faehige Anweisungen)
 - Iteration Guide (5-6 Regeln fuer konsistente Implementierung)
 
+### 10. Known Gaps
+- Ehrlich dokumentieren was NICHT extrahiert werden konnte
+- Proprietaere Fonts die nicht verfuegbar sind (mit Substitute-Empfehlungen)
+- Animationen/Transitions die nicht im statischen CSS sichtbar waren
+- Anzahl analysierter Seiten und welche Patterns evtl. fehlen
+- Fehlende Status-Farben, Icon-Systeme, oder andere Luecken
+- Ob Dark Mode nativ extrahiert oder abgeleitet wurde
+
 ## Qualitaetsregeln
 
 - JEDER CSS-Wert muss aus der tatsaechlichen Website stammen — nichts erfinden
@@ -65,4 +79,8 @@ Eine DESIGN.md hat exakt 9 Abschnitte. Jeder Abschnitt hat einen festen Zweck.
 - Shadows immer als vollstaendige CSS-Werte angeben
 - Font-Sizes in px UND rem
 - Keine generischen Beschreibungen — immer konkrete Werte
-- Der Einleitungstext (Abschnitt 1) soll die PERSOENLICHKEIT des Designs einfangen
+- Der Einleitungstext (Abschnitt 1) soll ARGUMENTATIV die PERSOENLICHKEIT des Designs einfangen
+- Page Rhythm als konkretes Muster dokumentieren
+- Font-Substitute IMMER empfehlen wenn proprietaere Fonts im Einsatz
+- Known Gaps ehrlich dokumentieren — Transparenz schafft Vertrauen
+- DESIGN-DARK.md muss eigenstaendig nutzbar sein — kein "siehe Light-Version"

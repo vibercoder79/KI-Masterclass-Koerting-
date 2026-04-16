@@ -1,132 +1,149 @@
-# DESIGN.md Generator
+# design-md-generator
 
-> Ein **Claude Code Skill**, der das visuelle Design-System einer Website und/oder aus Design-Guides (PDF, DOCX) extrahiert und als maschinenlesbare DESIGN.md im Google-Stitch-Format generiert — inklusive visueller HTML-Previews in Light und Dark Mode.
+**Version:** 1.6.0
 
-**Zweck:** KI-Agenten brauchen ein lesbares Design-System, um konsistente UI zu bauen. Dieser Skill extrahiert die tatsaechlich verwendeten CSS-Werte einer Website, fuehrt sie mit offiziellen Style-Guide-Regeln zusammen und generiert ein 9-Abschnitte-Dokument, das jeder Agent direkt als Referenz nutzen kann.
+## Was macht dieser Skill?
 
----
+Extrahiert das visuelle Design-System aus Websites und/oder Design-Dokumenten (PDF, DOCX, PPTX) und generiert eine vollstaendige DESIGN.md mit Light Mode und Dark Mode als separate, eigenstaendige Dokumente. Dazu kommen interaktive HTML-Previews als Mini-Websites und ein optionaler Style Guide als PPTX im Marken-Design. Der Skill ersetzt den kostenpflichtigen Service getdesign.md ($39/Monat) — mit deutlichen Erweiterungen.
 
-## Warum dieser Skill?
+## Installation
 
-| Problem | Loesung |
-|---------|---------|
-| KI-Agenten erfinden Farben und Fonts statt echte CSS-Werte zu verwenden | DESIGN.md liefert ausschliesslich extrahierte Werte — nichts wird erfunden |
-| Style Guides (PDF) und tatsaechliches CSS weichen oft voneinander ab | Skill fuehrt beide Quellen zusammen und dokumentiert Abweichungen |
-| Kein standardisiertes Format fuer KI-lesbares Design | Google-Stitch-Format mit 9 festen Abschnitten — vorhersagbar und maschinenlesbar |
-| Dark Mode wird oft vergessen | Automatische Dark-Mode-Ableitung und separater visueller Katalog |
-
----
-
-## Funktionsumfang
-
-- **Website-Analyse:** Extrahiert CSS Custom Properties, Font-Deklarationen, Farben, Shadows, Spacing, Media Queries per `defuddle` oder `WebFetch`
-- **Style-Guide-Analyse:** Liest offizielle Regeln aus PDF/DOCX/PPTX — Farbnamen, Do's/Don'ts, Typografie-Hierarchie, Raster-System
-- **CI-Profil-Import:** Uebernimmt bereits extrahierte Farben/Fonts aus dem ci-extraktor Skill
-- **Token-Zusammenfuehrung:** Fuehrt Website-CSS und Style-Guide-Regeln systematisch zusammen, mit Vorrang fuer den Style Guide
-- **DESIGN.md Generierung:** 9 Abschnitte nach Google-Stitch-Format (Visual Theme, Colors, Typography, Components, Layout, Depth, Do's/Don'ts, Responsive, Agent Prompt Guide)
-- **HTML-Previews:** Generiert `preview.html` (Light) und `preview-dark.html` (Dark) als visuellen Design-Katalog
-- **Screenshot-Analyse:** Optionale visuelle Analyse per Claude Preview fuer Atmosphaere und Gesamteindruck
-- **Brand-Dokumente:** Optionale Einbindung von Brand Story, Archetypen, Tonalitaets-Richtlinien fuer reichere Design-Dokumentation
-- **Style Guide PDF:** Optionaler Export als professionelles Style-Guide-Dokument (PPTX) in den Farben und Schriften der Marke — kein Template, individuell generiert
-
----
+```bash
+cp -r ~/Documents/GitHub/claudecodeskills/design-md-generator ~/.claude/skills/
+```
 
 ## Nutzung
-
-### Trigger-Befehle
 
 ```
 /design-md-generator
 ```
 
-Oder natuerliche Sprache:
-- "erstelle eine DESIGN.md"
-- "extrahiere das Design von [URL]"
-- "design system aus website"
-- "DESIGN.md fuer [Kundenname]"
+Gefolgt von der URL der zu analysierenden Website. Optional kann ein Style Guide als PDF, DOCX oder PPTX uebergeben werden.
 
-### Typischer Ablauf
-
-1. **Skill fragt nach Design-Quellen:** Website-URL und optional Style Guide (PDF/DOCX)
-2. **Skill fragt nach Brand-Dokumenten:** Brand Story, Archetypen, Tonalitaet (optional)
-3. **Analyse laeuft:** Website-CSS wird extrahiert, Dokumente werden gelesen
-4. **Tokens werden zusammengefuehrt:** Farben, Fonts, Spacing, Shadows, Components
-5. **Speicherort wird erfragt:** Aktuelles Verzeichnis, eigener Pfad oder Desktop
-6. **Drei Kerndateien werden erstellt:**
-   - `DESIGN.md` — Das Design-System-Dokument
-   - `preview.html` — Visueller Katalog (Light Mode)
-   - `preview-dark.html` — Visueller Katalog (Dark Mode)
-7. **Optional: Style Guide als PDF** — Professionelles Markendokument in den Farben und Schriften der Marke (via PPTX-Skill)
-
-### Beispiel 1: Nur Website
-
+**Beispiel:**
 ```
-> /design-md-generator
-> "Nein, nur die Website"
-> URL: https://example.com
+/design-md-generator https://example.com
 ```
 
-Ergebnis: DESIGN.md mit allen extrahierten CSS-Werten, automatisch abgeleitetem Dark Mode.
-
-### Beispiel 2: Website + Style Guide
-
+**Mit Style Guide:**
 ```
-> /design-md-generator
-> "Ja, hier ist die Datei" → style-guide.pdf
-> URL: https://example.com
+/design-md-generator https://example.com + Style Guide PDF
 ```
 
-Ergebnis: DESIGN.md mit zusammengefuehrten Werten aus beiden Quellen, offizielle Farbnamen und Do's/Don'ts aus dem Guide.
+Der Skill fragt vor dem Schreiben immer nach dem gewuenschten Speicherort.
 
----
+## Features
 
-## Die 9 Abschnitte der DESIGN.md
+### 10-Abschnitte-Format
 
-| # | Abschnitt | Inhalt |
-|---|-----------|--------|
-| 1 | Visual Theme & Atmosphere | Gesamteindruck, Design-Philosophie, Key Characteristics |
-| 2 | Color Palette & Roles | Farben mit Hex, CSS-Variable, Name, Verwendungszweck |
-| 3 | Typography Rules | Font Family, Hierarchie-Tabelle, Typografie-Prinzipien |
-| 4 | Component Stylings | Buttons, Cards, Inputs, Navigation, Distinctive Components |
-| 5 | Layout Principles | Spacing, Grid, Whitespace, Border Radius Scale |
-| 6 | Depth & Elevation | Shadow-Levels, Shadow-Philosophy, Decorative Depth |
-| 7 | Do's and Don'ts | Konkrete Regeln aus Style Guide + CSS-Analyse |
-| 8 | Responsive Behavior | Breakpoints, Collapsing Strategy, Touch Targets |
-| 9 | Agent Prompt Guide | Quick Reference, Example Prompts, Iteration Guide |
+Die DESIGN.md folgt einem standardisierten Format mit 10 Abschnitten:
 
----
+1. **Visual Theme & Atmosphere** — Gesamteindruck, Design-Philosophie, Key Characteristics, Page Rhythm
+2. **Color Palette & Roles** — Farben mit Hex, CSS-Variable, offiziellem Namen, Verwendungszweck
+3. **Typography Rules** — Font Family, Hierarchie-Tabelle, Principles, Font-Substitute-Empfehlungen
+4. **Component Stylings** — Buttons, Cards, Inputs, Navigation, Distinctive Components
+5. **Layout Principles** — Spacing, Grid, Whitespace, Border Radius Scale
+6. **Depth & Elevation** — Shadow-Levels, Shadow-Philosophy
+7. **Do's and Don'ts** — Aus Style Guide uebernommen + aus CSS abgeleitet
+8. **Responsive Behavior** — Breakpoints, Collapsing Strategy, Touch Targets
+9. **Agent Prompt Guide** — Quick Reference, Example Prompts, Iteration Guide
+10. **Known Gaps** — Was nicht extrahiert wurde, Limitationen, Substitutions-Hinweise
 
-## Qualitaetsregeln
+### Eigenstaendige DESIGN-DARK.md
 
-- **Keine erfundenen Werte** — Jeder CSS-Wert stammt aus der tatsaechlichen Website
-- **Style Guide hat Vorrang** — Bei Widerspruch zwischen CSS und Guide werden beide dokumentiert
-- **Hex lowercase** — Immer `#171717`, nie `171717` oder `#FFFFFF`
-- **Vollstaendige Shadows** — Als komplette CSS-Werte, nicht nur Farbwerte
-- **Duale Font-Sizes** — Immer px UND rem
-- **Spezifische Do's/Don'ts** — Keine generischen Plattitueden, sondern umsetzbare Regeln
+Dark Mode nicht als Appendix, sondern als vollstaendig autarkes Dokument:
+- 4-stufiger Surface-Ladder (Canvas, Surface, Card, Elevated)
+- Text-Opacity-Hierarchie (100%/78%/50%/30%)
+- Border-Opacity-Hierarchie
+- Eigene Agent Prompts fuer Dark-Mode-Implementierung
+- Known Gaps inkl. Hinweis ob Dark Mode nativ oder abgeleitet ist
 
----
+### Interaktive HTML-Previews als Mini-Websites
+
+Keine einfachen Farb-Kataloge, sondern echte Mini-Websites mit:
+- Sticky Nav mit Logo-Platzhalter und CTA-Button
+- Hero-Sektion mit Display-Headline und Button-Varianten
+- Farbpalette, Typografie-Skala, Button-Varianten
+- Card-Beispiele als 3-Column Service-Tiles
+- Formular mit Label, Input, Textarea, Checkbox, Submit
+- Spacing-Skala, Border-Radius-Scale, Elevation/Depth
+- Footer mit Nav-Links und Copyright
+
+Jeweils als `preview.html` (Light) und `preview-dark.html` (Dark).
+
+### 5 Input-Quellen
+
+| Quelle | Was sie liefert |
+|--------|----------------|
+| Website-URL | Tatsaechlich verwendete CSS-Werte |
+| Style Guide (PDF/DOCX/PPTX) | Offizielle Regeln, Farbnamen, Do's/Don'ts |
+| CI-Profil JSON | Bereits extrahierte Farben/Fonts |
+| Brand Guidelines / Brand Story | Persoenlichkeit, Werte, Positionierung |
+| Archetyp- / Tonalitaets-Dokumente | Markenstimme, Bildsprache-Regeln |
+
+### Optionaler Style Guide als PPTX
+
+Nach der DESIGN.md-Generierung bietet der Skill einen Style Guide als PPTX an:
+- 6-8 Slides im Marken-Design (Farben, Schriften, Layout der analysierten Marke)
+- Cover, Inhaltsverzeichnis, Farbpalette, Typografie, Komponenten, Layout, Do's/Don'ts
+- Kein generisches Template — alles dynamisch aus der DESIGN.md erzeugt
+- Zusaetzliche Slides wenn Brand-Dokumente vorhanden sind (Brand Story, Tonalitaet)
+
+### Argumentativer Schreibstil
+
+Abschnitt 1 (Visual Theme) erklaert nicht nur WAS das Design tut, sondern WARUM. Jede Design-Entscheidung wird begruendet: "Pill-Buttons (1000px Radius) sind die einzige interaktive Form die das System committet — die weiche Rundung steht im bewussten Kontrast zu den harten Uppercase-Headlines."
+
+### Page Rhythm als konkretes Pattern
+
+Der Seitenrhythmus wird als Copy-Paste-faehige Bauanleitung fuer KI-Agenten dokumentiert, z.B.:
+"Dark Hero -> Cream Service-Tiles -> Dark Portrait-Interstitial -> Cream Feature mit Accent-CTA -> Landscape Photo -> Dark Footer"
+
+### Font-Substitute-Empfehlungen
+
+Wenn die Website proprietaere Fonts nutzt, empfiehlt der Skill immer Open-Source-Alternativen mit aehnlichen Metrics und Hinweisen zu noetigem Feintuning (z.B. line-height-Anpassung).
+
+### Known Gaps fuer Transparenz
+
+Abschnitt 10 dokumentiert ehrlich was NICHT extrahiert werden konnte:
+- Proprietaere Fonts die nicht verfuegbar sind
+- Animationen/Transitions die nicht im statischen CSS sichtbar sind
+- Anzahl analysierter Seiten und welche Patterns evtl. fehlen
+- Fehlende Status-Farben oder Icon-Systeme
+
+### Speicherort-Abfrage
+
+Vor dem Schreiben der Dateien fragt der Skill immer nach dem gewuenschten Speicherort (aktuelles Verzeichnis, bestimmter Ordner oder Desktop).
+
+## Hintergrund
+
+Dieser Skill ist ein Reverse Engineering des kommerziellen Dienstes [getdesign.md](https://getdesign.md) ($39/Monat SaaS), der DESIGN.md-Dateien aus Websites generiert. Der Skill geht ueber den Funktionsumfang des Originals hinaus:
+
+- **Dark Mode als eigenstaendiges Dokument** — getdesign.md liefert nur Light Mode oder einen Appendix
+- **Style Guide PDF als Input** — offizielle Brand-Regeln fliessen in die Analyse ein
+- **Brand-Dokumente-Integration** — Brand Story, Archetypen und Tonalitaet bereichern das Ergebnis
+- **PPTX Style Guide als Output** — professionelles Kundendokument im Marken-Design
+- **Interaktive Mini-Website-Previews** — statt einfacher Farbkataloge
+- **Argumentativer Schreibstil** — erklaert Design-Entscheidungen, nicht nur Werte
+- **10 Abschnitte** statt 9 (Known Gaps als neuer Abschnitt fuer Transparenz)
 
 ## Dateistruktur
 
 ```
 design-md-generator/
-├── README.md                              ← Diese Datei
-├── SKILL.md                               ← Skill-Definition mit Workflow
+├── README.md                              <- Diese Datei
+├── SKILL.md                               <- Skill-Definition und Workflow
 └── references/
-    ├── design-md-format.md                ← Format-Referenz (9 Abschnitte)
-    ├── preview-template.html              ← HTML-Template (Light Mode)
-    └── preview-dark-template.html         ← HTML-Template (Dark Mode)
+    ├── design-md-format.md                <- DESIGN.md Format-Referenz
+    ├── preview-template.html              <- HTML-Preview-Template (Light)
+    └── preview-dark-template.html         <- HTML-Preview-Template (Dark)
 ```
 
----
+## Generierte Ausgabe-Dateien
 
-## Hintergrund
-
-Das DESIGN.md-Format basiert auf dem Google-Stitch-Ansatz: ein plain-text Design-System-Dokument, das KI-Agenten als Referenz lesen koennen, um konsistente UI zu bauen. Der Skill wurde entwickelt, weil bestehende Design-Extraktions-Tools entweder nur Farben liefern (ohne Kontext) oder nur fuer menschliche Leser formatiert sind (ohne Maschinenlesbarkeit).
-
-Die Kombination aus Website-Analyse und Style-Guide-Analyse schliesst eine Luecke: Websites zeigen was implementiert ist, Style Guides zeigen was beabsichtigt war. Beides zusammen ergibt das vollstaendige Bild.
-
----
-
-**Version:** 1.4.0 | **Skill-Name:** `design-md-generator`
+| Datei | Beschreibung |
+|-------|-------------|
+| `DESIGN.md` | Design-System (Light Mode), 10 Abschnitte |
+| `DESIGN-DARK.md` | Design-System (Dark Mode), eigenstaendig nutzbar |
+| `preview.html` | Interaktive Mini-Website-Preview (Light) |
+| `preview-dark.html` | Interaktive Mini-Website-Preview (Dark) |
+| `styleguide-[marke].pptx` | Optionaler Style Guide im Marken-Design |
