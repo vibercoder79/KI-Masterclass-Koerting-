@@ -1,17 +1,46 @@
 ---
 name: ideation
 description: |
-  Deep Research, Architektur-Pruefung und User Story Erstellung.
-  Verwenden wenn der Nutzer eine neue Idee hat, ein Feature vorschlaegt, oder "ideation" / "neue Story" sagt.
+  Deep Research, Architektur-Pruefung und User Story Erstellung. Liest vor Story-Erstellung
+  den Learning-Loop (falls aktiv) und warnt bei Anti-Pattern-Match. Verwenden wenn der Nutzer
+  eine neue Idee hat, ein Feature vorschlaegt, oder "ideation" / "neue Story" sagt.
   Ausloeser sind Anfragen wie "ich hab eine Idee", "neues Feature", "wir brauchen X", "/ideation".
-version: 1.3.0
+version: 2.0.0
 ---
 
 # Ideation
 
-Neue Ideen systematisch recherchieren, gegen Architektur + Backlog abgleichen und als qualitativ hochwertige User Story in Linear erstellen.
+Neue Ideen systematisch recherchieren, gegen Architektur + Backlog + Learnings abgleichen und als qualitativ hochwertige User Story erstellen.
 
-## Workflow (6 Schritte)
+## Workflow (7 Schritte)
+
+### Schritt 0.5: Learnings-Kontext (wenn Learning-Loop aktiv)
+
+> **Aktivierung:** Dieser Schritt wird nur ausgefuehrt wenn `{PROJECT_PATH}/.learning-loop` existiert (Inhalt: `L1`, `L2` oder `L3`).
+
+Vor der Story-Erstellung die letzten Lessons-Learned lesen und gegen die aktuelle Idee spiegeln.
+
+**L1:** Letzte 3 Eintraege in `journal/learnings.md` lesen.
+
+**L2/L3:** Letzte 2-3 Sprint-Retros lesen:
+- `journal/sprint-{YYYY-MM-XX}.md` nach Datum sortiert
+- Frontmatter-Tags `what_didnt` extrahieren
+
+**Matching:** Wenn ein `what_didnt`-Tag (oder Inhalt) thematisch zur aktuellen Story-Idee passt:
+
+```
+Warnung: Im letzten Retro wurde X als "funktioniert nicht" markiert (Root-Cause: Y).
+Beeinflusst das diese Story?
+
+Moegliche Optionen:
+  a) Story anpassen, um X zu vermeiden
+  b) Aktuelles Problem ist anders gelagert — weiter
+  c) Story verwerfen (das Pattern ist nicht tragfaehig)
+```
+
+Operator entscheidet. Antwort wird in der Story unter `Current State` als Kontext-Hinweis dokumentiert.
+
+**Kein Match:** Schritt 0.5 wird in der Story erwaehnt als *"Learnings-Check: keine Anti-Pattern-Matches"* und weiter zu Schritt 1.
 
 ### Schritt 1: Research (wenn noetig)
 
@@ -35,17 +64,19 @@ Parallel ausfuehren:
    - [ ] §7 Scalability Roadmap
    - [ ] §8 Testing Architecture
    - [ ] Referenzen-Sektion (Querverweise auf weitere Architektur-Dokumente)
-3. `SYSTEM_ARCHITECTURE.md` VOLLSTAENDIG lesen — Agent-Liste, Signal-Flow, Brain DB, Schwachstellen
+3. `SYSTEM_ARCHITECTURE.md` VOLLSTAENDIG lesen — Komponenten-Liste, Daten-Fluesse, bekannte Schwachstellen
 4. `lib/config.js` relevante Sektionen pruefen
 5. Pruefen: Gibt es schon ein aehnliches Issue? Existiert das Feature teilweise?
 
-**Brain-DB Schema Check (PFLICHT wenn Story die Datenbank beruehrt):**
+**DB-Schema-Check (PFLICHT wenn Story eine persistente Datenquelle beruehrt — nur wenn Projekt eine DB/Schema-Registry hat):**
 
-1. `lib/claw-db.js` (oder aequivalentes DB-Modul) lesen → `SCHEMA_VERSION` Konstante = aktuelle Produktiv-Version
+1. Aktuelles Schema lesen (projekt-spezifisches DB-Modul, z.B. `lib/db.js` mit `SCHEMA_VERSION`-Konstante)
 2. Alle offenen Issues nach `## DB Schema Impact` Sektion durchsuchen — welche Versionen sind bereits "vergeben"?
 3. Naechste freie Ziel-Version ermitteln (Konflikt = zwei Stories mit gleicher `targetSchemaVersion`)
-4. Im Story-Spec `## DB Schema Impact` ausfuellen: `currentSchemaVersion` + `targetSchemaVersion` + neue Tabellen
+4. Im Story-Spec `## DB Schema Impact` ausfuellen: `currentSchemaVersion` + `targetSchemaVersion` + neue Tabellen/Spalten
 5. Bei Versionskonflikt: Reihenfolge in `## Abhaengigkeiten` festhalten ("muss nach [STORY-XXX] implementiert werden")
+
+Wenn das Projekt keine versionierte DB-Schema-Verwaltung hat: Schritt uebergehen.
 
 > **Warum ARCHITECTURE_DESIGN.md vollstaendig?** Es ist das einzige Dokument das alle
 > Architektur-Entscheidungen (ADRs), Quality Attributes und strategische Constraints
