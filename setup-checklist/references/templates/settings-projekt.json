@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": ["Bash(npm test)", "Bash(npm run *)", "Edit(src/**)"],
+    "deny": ["Edit(.env)"]
+  },
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit|Write",
+      "command": "npx prettier --write $FILEPATH"
+    }],
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "command": "bash hooks/guard.sh \"$TOOL_INPUT\""
+    }],
+    "Stop": [{
+      "matcher": "",
+      "command": "echo \"Reminder: /wrap-up ausfuehren!\""
+    }]
+  }
+}

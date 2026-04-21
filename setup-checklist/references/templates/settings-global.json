@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "autoMemoryEnabled": true,
+  "effortLevel": "xhigh",
+  "showThinkingSummaries": true,
+  "permissions": {
+    "allow": ["Bash(git *)", "Bash(node *)", "Bash(npm *)"],
+    "deny": ["Bash(rm -rf /)"]
+  }
+}

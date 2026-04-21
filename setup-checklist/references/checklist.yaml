@@ -1,0 +1,331 @@
+# ============================================================
+# Claude Code Best Practice Checkliste v15
+# Maschinenlesbare Version — Source of Truth fuer den Setup-Skill
+# ============================================================
+# Basiert auf: claude_code_checkliste_v15 (OWLIST GmbH, April 2026)
+# Quellen: Anthropic Model-Config Docs (code.claude.com/docs/en/model-config),
+#          "What's new in Claude Opus 4.7" (platform.claude.com)
+# Historie v14 → v15 (Opus 4.7 Update):
+#   - effortLevel: "high" → "xhigh" (Opus 4.7 Default fuer Engineering)
+#   - CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING entfernt (obsolet: 4.7 nutzt immer
+#     Adaptive Thinking, keine Fixed-Budgets mehr)
+#   - CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS entfernt (GA seit Claude Code v2.1.111)
+#   - 1M-Context-Hinweis neu (Opus 4.7 Max/Team/Enterprise automatisch)
+# ============================================================
+
+version: "15"
+date: "2026-04-21"
+
+# ============================================================
+# TEIL 1: Globales Setup (pro Rechner)
+# ============================================================
+global:
+
+  # --- ~/.claude/settings.json ---
+  settings:
+    "$schema": "https://json.schemastore.org/claude-code-settings.json"
+    autoMemoryEnabled: true
+    effortLevel: "xhigh"
+    showThinkingSummaries: true
+    permissions:
+      allow:
+        - "Bash(git *)"
+        - "Bash(node *)"
+        - "Bash(npm *)"
+      deny:
+        - "Bash(rm -rf /)"
+    # Hinweis: Bei Pay-as-you-go / Pro-Abo kann effortLevel auf "high" oder
+    # "medium" reduziert werden (spart Tokens, leicht flachere Reasoning-Tiefe).
+    # Erlaubte Werte: low, medium, high, xhigh, max
+
+  # --- Sandboxing (empfohlen) ---
+  sandbox:
+    enabled: true
+    filesystem:
+      allowWrite:
+        - "$PROJECT_DIR/**"
+      denyRead:
+        - "~/.ssh/**"
+        - "~/.aws/**"
+        - "~/.env"
+      denyWrite:
+        - "~/.claude/settings.json"
+    network:
+      allowedDomains:
+        - "registry.npmjs.org"
+        - "github.com"
+
+  # --- Permission Mode ---
+  permission_mode:
+    default: "manual"
+    options:
+      - mode: "manual"
+        description: "Claude fragt bei jeder riskanten Aktion (Standard, sicher)"
+      - mode: "auto"
+        description: "Claude entscheidet selbst (fuer erfahrene Nutzer)"
+      - mode: "custom"
+        description: "Eigene allow/deny-Listen (meiste Kontrolle)"
+
+  # --- CLAUDE.md Template ---
+  claude_md:
+    max_lines: 200
+    sections:
+      - name: "Sprache"
+        content: "Alle Kommunikation auf Deutsch."
+      - name: "Arbeitsweise"
+        rules:
+          - "Vor Code-Aenderungen immer fragen, nie eigenmaechtig refactoren"
+          - "Secrets niemals im Code — nur via .env oder Secret Manager"
+          - "Antworten kurz und direkt, keine Zusammenfassungen am Ende"
+          - "Bestehende Dateien IMMER mit Edit aendern, Write nur fuer neue Dateien"
+          - "Vor JEDER Code-Aenderung: betroffene Dateien VOLLSTAENDIG lesen"
+      - name: "Secrets-Policy"
+        levels:
+          minimum:
+            description: ".env + .gitignore + chmod 600"
+          empfohlen:
+            description: "Zusaetzlich CLAUDE.md-Regel"
+            rules:
+              - "NIEMALS Secrets, API-Keys, Passwoerter oder Tokens in Code-Dateien schreiben"
+              - "NIEMALS .env-Dateien lesen, anzeigen oder in Outputs einfuegen"
+              - "Secrets liegen ausschliesslich in .env — niemals hardcoden oder committen"
+          professionell:
+            description: "Externer Secret Manager (1Password CLI, Infisical, Doppler)"
+            rules:
+              - "NIEMALS Secrets, API-Keys, Passwoerter oder Tokens in Code-Dateien schreiben"
+              - "NIEMALS .env-Dateien lesen, anzeigen oder in Outputs einfuegen"
+              - "Secrets ausschliesslich via Secret Manager laden"
+
+
+# ============================================================
+# TEIL 2: Projekt-Setup (pro Projekt)
+# ============================================================
+projekt:
+
+  # --- .claudeignore ---
+  claudeignore:
+    - "node_modules/"
+    - "dist/"
+    - "build/"
+    - ".env"
+    - ".env.*"
+    - "*.lock"
+    - "coverage/"
+    - "*.log"
+    - ".DS_Store"
+
+  # --- CLAUDE.md Projekt-Template ---
+  claude_md:
+    max_lines: 150
+    sections:
+      - name: "Build & Test"
+        placeholder: true
+        example: |
+          npm run dev       # Entwicklungsserver starten
+          npm test          # Tests ausfuehren
+          npm run build     # Production Build
+      - name: "Architektur"
+        placeholder: true
+        example: |
+          // Node.js Monolith. Einstiegspunkt: src/index.ts
+          // Keine direkten DB-Queries ausserhalb von src/db/
+      - name: "Regeln"
+        placeholder: true
+        example: |
+          // Vor jeder Code-Aenderung: betroffene Dateien vollstaendig lesen
+          // Secrets niemals im Code — nur via .env oder Secret Manager
+          // Bash-Outputs bei Bedarf mit | head -100 begrenzen
+          // Bei fehlschlagenden Tests: Root Cause fixen, nicht den Test anpassen
+
+  # --- .claude/settings.json Projekt ---
+  settings:
+    permissions:
+      allow:
+        - "Bash(npm test)"
+        - "Bash(npm run *)"
+        - "Edit(src/**)"
+      deny:
+        - "Edit(.env)"
+
+  # --- Hooks ---
+  hooks:
+    PostToolUse:
+      - matcher: "Edit|Write"
+        command: "npx prettier --write $FILEPATH"
+        description: "Auto-Formatter nach jedem Edit/Write"
+        requires: "prettier"
+    PreToolUse:
+      - matcher: "Bash"
+        command: 'bash hooks/guard.sh "$TOOL_INPUT"'
+        description: "Guard-Script schuetzt sensible Dateien"
+    Stop:
+      - matcher: ""
+        command: 'echo "Reminder: /wrap-up ausfuehren!"'
+        description: "Erinnerung am Session-Ende"
+
+  # --- Rules ---
+  rules:
+    coding_style:
+      filename: "coding-style.md"
+      content: |
+        # Coding Style
+        // TypeScript strict mode, keine any-Types
+        // Funktionen max. 30 Zeilen, sonst aufteilen
+        // Fehlerbehandlung: immer try/catch bei externen API-Aufrufen
+        // Variablennamen auf Englisch, Kommentare auf Deutsch
+    api_security:
+      filename: "api-security.md"
+      paths:
+        - "src/api/**/*.ts"
+        - "src/middleware/**/*.ts"
+      content: |
+        # API Security Rules
+        // Jeder Endpoint braucht Authentication-Middleware
+        // Input-Validierung mit zod vor der Verarbeitung
+        // Rate-Limiting fuer alle oeffentlichen Endpoints
+
+  # --- Guard-Script ---
+  guard_script: |
+    #!/bin/bash
+    # hooks/guard.sh — Schuetzt sensible Dateien vor Claude-Zugriff
+    INPUT="$1"
+    PROTECTED_PATTERNS=(
+      ".env"
+      "credentials"
+      "secrets"
+      "/etc/passwd"
+      "id_rsa"
+      "production"
+    )
+    for pattern in "${PROTECTED_PATTERNS[@]}"; do
+      if echo "$INPUT" | grep -qi "$pattern"; then
+        echo "BLOCKED: Zugriff auf geschuetzte Ressource ($pattern)" >&2
+        exit 2
+      fi
+    done
+    exit 0
+
+  # --- Optional: Coding Governance ---
+  # --- Thinking Depth (Opus 4.7: Adaptive Thinking ist jetzt gut) ---
+  thinking_depth:
+    description: >
+      Mit Opus 4.7 wurde das Adaptive-Thinking-System neu aufgesetzt — die
+      "Adaptive Thinking Regression" aus Sommer 2025 (Issue #2654, AMD/Laurenzo)
+      gilt hier nicht mehr. Opus 4.7 nutzt Adaptive Thinking permanent und hat
+      keine Fixed-Budget-Mode mehr. Die Wirksamkeits-Kombination heute:
+      effortLevel: xhigh + showThinkingSummaries. Die alte ENV-Variable
+      CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING ist obsolet und sollte entfernt
+      werden (sie greift in 4.7 nicht mehr und verwirrt bei Audits).
+    source: "Anthropic Model-Config Docs (code.claude.com/docs/en/model-config), What's new in Claude Opus 4.7"
+    settings:
+      effortLevel: "xhigh"
+      showThinkingSummaries: true
+    deprecated_env:
+      - name: "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING"
+        reason: "Obsolet mit Opus 4.7 — greift nur bei Opus 4.6 / Sonnet 4.6"
+      - name: "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
+        reason: "Agent Teams sind GA seit Claude Code v2.1.111 — Flag ueberfluessig"
+
+  coding_governance:
+    description: "Erweiterte Regeln fuer Softwareentwicklungsprojekte"
+    rules:
+      - "Vor JEDER Code-Aenderung: betroffene Dateien VOLLSTAENDIG lesen"
+      - "NIEMALS eine Datei komplett neu schreiben wenn Edit genuegt"
+      - "Bei Fehlern: Root Cause analysieren, nicht Symptome unterdruecken"
+      - "Bestehende Dateien IMMER mit Edit aendern, Write nur fuer neue Dateien"
+      - "Bei fehlschlagenden Tests: Root Cause fixen, nicht den Test anpassen"
+      - "Vor jeder Implementierung: Plan erstellen und validieren lassen"
+    thinking_depth:
+      effortLevel: "high"
+      prompt_pattern: "Analysiere zuerst, plane dann, implementiere zuletzt"
+    verification:
+      rules:
+        - "Tests schreiben VOR der Implementierung (Test-first)"
+        - "Nach UI-Aenderungen: Screenshot pruefen"
+        - "Nach Config-Aenderungen: Validierung ausfuehren"
+
+
+# ============================================================
+# AUDIT: Pruefbare Kriterien
+# ============================================================
+audit:
+  global:
+    - check: "settings.json existiert"
+      path: "~/.claude/settings.json"
+      type: "file_exists"
+    - check: "autoMemoryEnabled ist true"
+      path: "~/.claude/settings.json"
+      type: "json_value"
+      key: "autoMemoryEnabled"
+      expected: true
+    - check: "effortLevel ist xhigh (Opus 4.7 Default)"
+      path: "~/.claude/settings.json"
+      type: "json_value"
+      key: "effortLevel"
+      expected: "xhigh"
+      note: "Werte high/medium/low sind bei Pay-as-you-go ok — Warnung, kein Fehler"
+    - check: "Adaptive-Thinking-Flag NICHT mehr gesetzt (obsolet mit Opus 4.7)"
+      path: "~/.claude/settings.json"
+      type: "json_value_absent"
+      key: "env.CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING"
+      warn_if_present: >
+        Diese Env-Variable ist mit Opus 4.7 obsolet — sie wurde fuer die
+        "Adaptive Thinking Regression" in Opus 4.6/Sonnet 4.6 eingefuehrt
+        und greift in 4.7 nicht mehr. Empfehlung: aus settings.json entfernen.
+    - check: "Experimental-Agent-Teams-Flag NICHT mehr gesetzt (GA seit v2.1.111)"
+      path: "~/.claude/settings.json"
+      type: "json_value_absent"
+      key: "env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
+      warn_if_present: >
+        Agent Teams sind seit Claude Code v2.1.111 GA. Das Experimental-Flag
+        wird nicht mehr benoetigt. Empfehlung: aus settings.json entfernen.
+    - check: "Thinking-Summaries aktiviert"
+      path: "~/.claude/settings.json"
+      type: "json_value"
+      key: "showThinkingSummaries"
+      expected: true
+    - check: "CLAUDE.md existiert"
+      path: "~/.claude/CLAUDE.md"
+      type: "file_exists"
+    - check: "CLAUDE.md unter 200 Zeilen"
+      path: "~/.claude/CLAUDE.md"
+      type: "max_lines"
+      max: 200
+    - check: "Secrets-Policy vorhanden"
+      path: "~/.claude/CLAUDE.md"
+      type: "contains"
+      pattern: "Secrets"
+
+  projekt:
+    - check: ".claudeignore existiert"
+      path: ".claudeignore"
+      type: "file_exists"
+    - check: ".env in .claudeignore"
+      path: ".claudeignore"
+      type: "contains"
+      pattern: ".env"
+    - check: "CLAUDE.md existiert"
+      path: "CLAUDE.md"
+      type: "file_exists"
+    - check: "CLAUDE.md unter 150 Zeilen"
+      path: "CLAUDE.md"
+      type: "max_lines"
+      max: 150
+    - check: ".claude/settings.json existiert"
+      path: ".claude/settings.json"
+      type: "file_exists"
+    - check: "Hooks konfiguriert"
+      path: ".claude/settings.json"
+      type: "contains"
+      pattern: "hooks"
+    - check: "CLAUDE.local.md in .gitignore"
+      path: ".gitignore"
+      type: "contains"
+      pattern: "CLAUDE.local.md"
+    - check: "Guard-Script vorhanden"
+      path: "hooks/guard.sh"
+      type: "file_exists"
+    - check: "Lese-Pflicht in CLAUDE.md"
+      path: "CLAUDE.md"
+      type: "contains"
+      pattern: "lesen"
