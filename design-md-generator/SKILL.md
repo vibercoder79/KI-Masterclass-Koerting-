@@ -1,12 +1,20 @@
 ---
 name: design-md-generator
 description: |
-  Extrahiert das visuelle Design-System einer Website und/oder aus Design-Guides (PDF, DOCX)
-  und generiert eine DESIGN.md im Google-Stitch-Format. Verwenden wenn der Nutzer ein
-  Design-System extrahieren, eine DESIGN.md erstellen oder das visuelle Design dokumentieren
-  moechte. Ausloeser: "erstelle eine DESIGN.md", "extrahiere das Design von...",
-  "design system aus website", "DESIGN.md fuer...", "design md".
-version: 1.6.0
+  Extrahiert das visuelle Design-System einer Website und/oder aus Design-Guides (PDF, DOCX, PPTX)
+  und generiert eine DESIGN.md (Light + Dark Mode), interaktive HTML-Previews und einen
+  optionalen Style Guide als PPTX im Marken-Design. Reverse-Engineering von getdesign.md —
+  kostenlos und lokal, mit Style-Guide-Erstellung die getdesign.md nicht hat.
+  Typische Anwendungsfaelle: Wettbewerbsanalyse, Design-Mustersuche, schnelles Briefing-Material
+  fuer Designer/Agenturen, maschinenlesbares Briefing fuer Claude Design / Cursor / Lovable /
+  v0 (eigene Webseite oder Muster-Designs).
+  Verwenden wenn der Nutzer ein Design-System extrahieren, eine DESIGN.md erstellen, das
+  visuelle Design einer Website dokumentieren, einen Konkurrenten analysieren oder
+  Claude Design mit einem Referenz-Design briefen moechte.
+  Ausloeser: "erstelle eine DESIGN.md", "extrahiere das Design von...",
+  "design system aus website", "DESIGN.md fuer...", "design md",
+  "analysiere die Webseite von...", "Wettbewerber-Design", "Muster-Design".
+version: 1.7.0
 ---
 
 # DESIGN.md Generator
@@ -15,6 +23,20 @@ Extrahiert das visuelle Design-System aus Websites und/oder Design-Dokumenten un
 eine DESIGN.md (Light + Dark Mode als separate Dokumente), interaktive HTML-Previews und
 einen optionalen Style Guide als PPTX — alles was KI-Agenten und Designer brauchen um
 konsistente UI zu bauen.
+
+**Grundlage:** Reverse-Engineering des kommerziellen Dienstes [getdesign.md](https://getdesign.md/).
+Der Skill liefert denselben Output wie getdesign.md (10-Abschnitte-Format), geht aber weiter —
+eigenstaendiger Dark Mode, interaktive HTML-Preview, **Style Guide als PPTX im Marken-Design
+(von getdesign.md nicht geboten)**, Brand-Dokumente-Integration — und ist kostenlos.
+
+**Typische Anwendungsfaelle:**
+
+1. **Wettbewerbsanalyse** — visuelle Sprache eines Konkurrenten systematisch erfassen
+2. **Mustersuche / Design-Inspiration** — Bauplan einer Vorbild-Website extrahieren
+3. **Schnelles Briefing-Material** — Designer / Agentur / Freelancer in 10 Minuten briefen
+4. **Claude Design / Claude Code Briefing** — maschinenlesbares Design-Briefing fuer
+   Agenten-basierte UI-Builder (Claude Design, Cursor, Lovable, v0) — eigene Webseite
+   analysieren oder Muster-Design uebergeben
 
 Format-Referenz: Siehe [references/design-md-format.md](references/design-md-format.md)
 

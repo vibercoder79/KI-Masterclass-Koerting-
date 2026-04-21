@@ -1,188 +1,62 @@
-[🇬🇧 English](#english) · [🇩🇪 Deutsch](#deutsch)
-
----
-
-<a name="english"></a>
-
 # design-md-generator
 
-**Version:** 1.6.0
+**Version:** 1.7.0
+**Sprache dieser Datei:** Deutsch · [English version](README.en.md)
 
-## What the skill does
-
-Extracts the visual design system from websites and/or design documents (PDF, DOCX, PPTX) and generates a complete DESIGN.md with Light Mode and Dark Mode as separate, self-contained documents. On top: interactive HTML previews as mini-websites, and an optional Style Guide as PPTX in the brand's design. The skill replaces the paid service getdesign.md ($39/month) — with substantial extensions.
-
-## Installation
-
-```bash
-cp -r ~/Documents/GitHub/claudecodeskills/design-md-generator ~/.claude/skills/
-```
-
-## Usage
-
-```
-/design-md-generator
-```
-
-Followed by the URL of the website to analyze. Optionally a style guide as PDF, DOCX, or PPTX can be passed.
-
-**Example:**
-```
-/design-md-generator https://example.com
-```
-
-**With style guide:**
-```
-/design-md-generator https://example.com + Style Guide PDF
-```
-
-The skill always asks where to save before writing.
-
-## Features
-
-### 10-section format
-
-The DESIGN.md follows a standardized format with 10 sections:
-
-1. **Visual Theme & Atmosphere** — overall impression, design philosophy, key characteristics, page rhythm
-2. **Color Palette & Roles** — colors with hex, CSS variable, official name, purpose
-3. **Typography Rules** — font family, hierarchy table, principles, font-substitute recommendations
-4. **Component Stylings** — buttons, cards, inputs, navigation, distinctive components
-5. **Layout Principles** — spacing, grid, whitespace, border-radius scale
-6. **Depth & Elevation** — shadow levels, shadow philosophy
-7. **Do's and Don'ts** — from style guide + derived from CSS
-8. **Responsive Behavior** — breakpoints, collapsing strategy, touch targets
-9. **Agent Prompt Guide** — quick reference, example prompts, iteration guide
-10. **Known Gaps** — what was not extracted, limitations, substitution hints
-
-### Self-contained DESIGN-DARK.md
-
-Dark mode not as an appendix, but as a fully autonomous document:
-- 4-tier surface ladder (canvas, surface, card, elevated)
-- Text opacity hierarchy (100%/78%/50%/30%)
-- Border opacity hierarchy
-- Own agent prompts for dark-mode implementation
-- Known Gaps including hint whether dark mode is native or derived
-
-### Interactive HTML previews as mini-websites
-
-Not simple color catalogs, but real mini-websites with:
-- Sticky nav with logo placeholder and CTA button
-- Hero section with display headline and button variants
-- Color palette, typography scale, button variants
-- Card examples as 3-column service tiles
-- Form with label, input, textarea, checkbox, submit
-- Spacing scale, border-radius scale, elevation/depth
-- Footer with nav links and copyright
-
-Each as `preview.html` (Light) and `preview-dark.html` (Dark).
-
-### 5 input sources
-
-| Source | What it provides |
-|--------|------------------|
-| Website URL | CSS values actually used in production |
-| Style Guide (PDF/DOCX/PPTX) | Official rules, color names, Do's/Don'ts |
-| CI-Profile JSON | Already extracted colors/fonts |
-| Brand Guidelines / Brand Story | Personality, values, positioning |
-| Archetype / Tonality documents | Brand voice, imagery rules |
-
-### Optional Style Guide as PPTX
-
-After DESIGN.md generation the skill offers a style guide as PPTX:
-- 6–8 slides in the brand design (colors, fonts, layout of the analyzed brand)
-- Cover, TOC, color palette, typography, components, layout, Do's/Don'ts
-- No generic template — all dynamically generated from DESIGN.md
-- Additional slides if brand documents are present (brand story, tonality)
-
-### Argumentative writing style
-
-Section 1 (Visual Theme) explains not only WHAT the design does, but WHY. Every design decision is justified: "Pill buttons (1000px radius) are the only interactive shape the system commits to — the soft rounding stands in deliberate contrast to the hard uppercase headlines."
-
-### Page Rhythm as a concrete pattern
-
-The page rhythm is documented as a copy-paste-ready build instruction for AI agents, e.g.:
-"Dark Hero → Cream Service Tiles → Dark Portrait Interstitial → Cream Feature with Accent CTA → Landscape Photo → Dark Footer"
-
-### Font substitute recommendations
-
-When the website uses proprietary fonts, the skill always recommends open-source alternatives with similar metrics and hints on necessary fine-tuning (e.g. line-height adjustment).
-
-### Known Gaps for transparency
-
-Section 10 honestly documents what could NOT be extracted:
-- Proprietary fonts that are unavailable
-- Animations/transitions not visible in static CSS
-- Number of pages analyzed and which patterns might be missing
-- Missing status colors or icon systems
-
-### Save-location prompt
-
-Before writing files, the skill always asks where to save (current directory, specific folder, or desktop).
-
-## Background
-
-This skill is a reverse engineering of the commercial service [getdesign.md](https://getdesign.md) ($39/month SaaS), which generates DESIGN.md files from websites. The skill goes beyond the original's feature set:
-
-- **Dark mode as standalone document** — getdesign.md delivers only light mode or an appendix
-- **Style Guide PDF as input** — official brand rules flow into the analysis
-- **Brand document integration** — brand story, archetypes, tonality enrich the result
-- **PPTX Style Guide as output** — professional customer document in brand design
-- **Interactive mini-website previews** — instead of simple color catalogs
-- **Argumentative writing style** — explains design decisions, not just values
-- **10 sections** instead of 9 (Known Gaps as a new section for transparency)
-
-## Trigger Phrases
-
-- `/design-md-generator`
-- "extract the design from..."
-- "DESIGN.md for..."
-- "design system from website"
-
-## Interfaces with Other Skills
-
-| Upstream | What's provided | Downstream | What we deliver |
-|----------|-----------------|------------|------------------|
-| Website URL | Live CSS + screenshots | AI agents | Copy-paste brand prompts |
-| Style Guide PDF/PPTX | Official brand rules | Designers | Visual component reference |
-| CI-Profile JSON | Pre-extracted colors/fonts | Marketing | Customer-ready style guide PPTX |
-| Brand docs | Personality, voice, imagery | `visualize` / front-end builds | Design-system source of truth |
-
-## File Structure
-
-```
-design-md-generator/
-├── README.md                              ← This file
-├── SKILL.md                               ← Skill definition and workflow
-└── references/
-    ├── design-md-format.md                ← DESIGN.md format reference
-    ├── preview-template.html              ← HTML preview template (Light)
-    └── preview-dark-template.html         ← HTML preview template (Dark)
-```
-
-## Generated output files
-
-| File | Description |
-|------|-------------|
-| `DESIGN.md` | Design system (Light Mode), 10 sections |
-| `DESIGN-DARK.md` | Design system (Dark Mode), self-contained |
-| `preview.html` | Interactive mini-website preview (Light) |
-| `preview-dark.html` | Interactive mini-website preview (Dark) |
-| `styleguide-[brand].pptx` | Optional style guide in brand design |
+Reverse-Engineering des kostenpflichtigen SaaS-Dienstes [getdesign.md](https://getdesign.md/) — mit mehr Funktionsumfang und komplett kostenlos. Der Skill extrahiert das visuelle Design-System aus Websites und Design-Dokumenten und generiert eine vollstaendige DESIGN.md (Light Mode + Dark Mode), interaktive HTML-Previews und einen optionalen Style Guide im Marken-Design.
 
 ---
 
+## Wofuer nimmt man diesen Skill?
+
+Dieser Skill ist fuer vier sehr unterschiedliche Einsatzzwecke gebaut — alle drehen sich um die Frage: **"Wie sieht dieses Design-System aus und wie baue ich darin?"**
+
+### 1. Wettbewerbsanalyse
+
+Du willst verstehen, wie ein Konkurrent visuell auftritt — welche Farben, welche Schriften, welche Komponentenlogik, welcher Seitenrhythmus. Statt manuell im DevTools-Inspector zu wuehlen, laeufst du einmal durch diesen Skill und bekommst ein 10-Abschnitte-Design-Dokument, das die komplette visuelle Sprache abbildet. Ideal, um Positionierungs-Luecken zu finden oder zu verstehen, warum ein Konkurrent als "premium" oder "frisch" wahrgenommen wird.
+
+### 2. Mustersuche (Design-Inspiration)
+
+Du hast eine Website gefunden, die dir gefaellt, und willst ihr Muster als Vorlage nehmen — nicht 1:1, sondern als Bauplan. Der Skill liefert: Farb-Palette, Typografie-Hierarchie, Button-Pattern, Card-Pattern, Spacing-Scale, Shadow-Logik, Page-Rhythm. Daraus leitest du ein eigenes Design-System ab oder gibst es an einen KI-Agenten weiter.
+
+### 3. Schnelles Briefing-Material
+
+Du willst einem Designer, Freelancer oder einer Agentur in 10 Minuten ein Gefuehl fuer das gewuenschte Look & Feel geben. Statt Moodboard oder Lastenheft: gib der Person die DESIGN.md + den Style-Guide-PPTX von zwei oder drei Referenz-Websites. Das ist schneller als jedes Briefing-Meeting und praeziser als jedes geschriebene Brief.
+
+### 4. Claude Design / Claude Code Briefing — eigene Webseite oder Muster-Designs
+
+Der Hauptanwendungsfall fuer alle, die mit KI-Agenten Websites, Apps oder UI bauen: eine DESIGN.md ist das **maschinenlesbare Briefing**, das Claude Design, Cursor, Lovable, v0 oder Claude Code verstehen. Statt Screenshots hochzuladen und zu hoffen, dass der Agent "den Vibe" trifft, uebergibst du eine strukturierte DESIGN.md mit allen Tokens, Komponenten-Regeln und Copy-Paste-Agent-Prompts. Der Agent baut dann konsistent innerhalb des Systems.
+
+Drei konkrete Szenarien:
+
+- **Eigene Webseite neu bauen:** Lass deine bestehende Webseite analysieren und nimm die DESIGN.md als Input fuer einen Relaunch mit Claude Design — das garantiert visuelle Kontinuitaet.
+- **Muster-Designs generieren:** Du willst drei Landing-Page-Varianten "im Stil von Website X" — die DESIGN.md ist der Muster-Trainings-Input fuer den Agenten.
+- **Design-System dokumentieren:** Deine eigene Seite hat kein formales Design-System — lass sie analysieren, und du hast auf Knopfdruck ein vollstaendiges Dokument.
+
 ---
 
-<a name="deutsch"></a>
+## Abgrenzung zu getdesign.md
 
-# design-md-generator
+Dieser Skill ist ein Reverse-Engineering des kommerziellen Dienstes [getdesign.md](https://getdesign.md/) — er liefert denselben Output (und daher dasselbe 10-Abschnitte-Format), geht aber an mehreren Stellen darueber hinaus:
 
-**Version:** 1.6.0
+| Feature | getdesign.md | design-md-generator |
+|---------|--------------|---------------------|
+| **Preis** | Kostenpflichtig (SaaS) | Kostenlos |
+| **DESIGN.md (Light Mode)** | Ja | Ja |
+| **DESIGN-DARK.md (eigenstaendig)** | Nein | Ja |
+| **Interaktive HTML-Preview** | Nein | Ja (Light + Dark, als Mini-Website) |
+| **Style Guide als PPTX im Marken-Design** | Nein | Ja |
+| **Style Guide PDF als Input** | Nein | Ja |
+| **Brand-Dokumente-Integration** | Nein | Ja (Brand Story, Archetypen, Tonalitaet) |
+| **Argumentativer Schreibstil (WARUM statt WAS)** | Nein | Ja |
+| **Page Rhythm als Copy-Paste-Pattern** | Nein | Ja |
+| **Font-Substitute-Empfehlungen** | Nein | Ja |
+| **Known Gaps (Transparenz-Abschnitt)** | Nein | Ja |
+| **Bleibt in deinem System** | Nein (SaaS) | Ja (lokal, keine Cloud) |
 
-## Was macht dieser Skill?
+**Der entscheidende Mehrwert:** getdesign.md liefert ein reines Markdown-Dokument. Der design-md-generator liefert zusaetzlich einen **Style Guide** — dein Kunde oder Team bekommt also nicht nur ein Agenten-Briefing, sondern auch eine professionelle PDF/PPTX-Praesentation im Marken-Design, die in einem Pitch-Deck oder als Brand-Guideline funktioniert. Das ist der Schritt von "Input fuer KI" zu "Deliverable fuer Menschen". Und weil der Skill lokal laeuft, bleiben alle Analysen in deiner Umgebung — kein Upload auf fremde Server.
 
-Extrahiert das visuelle Design-System aus Websites und/oder Design-Dokumenten (PDF, DOCX, PPTX) und generiert eine vollstaendige DESIGN.md mit Light Mode und Dark Mode als separate, eigenstaendige Dokumente. Dazu kommen interaktive HTML-Previews als Mini-Websites und ein optionaler Style Guide als PPTX im Marken-Design. Der Skill ersetzt den kostenpflichtigen Service getdesign.md ($39/Monat) — mit deutlichen Erweiterungen.
+---
 
 ## Installation
 
@@ -210,6 +84,18 @@ Gefolgt von der URL der zu analysierenden Website. Optional kann ein Style Guide
 
 Der Skill fragt vor dem Schreiben immer nach dem gewuenschten Speicherort.
 
+---
+
+## Uebersicht: So arbeitet der Skill
+
+![design-md-generator overview](overview.png)
+
+Das Diagramm zeigt den kompletten Ablauf:
+
+- **Inputs (links):** Website-URL, Style Guide, CI-Profil, Brand Story, Tonalitaets-Dokumente
+- **Analyse (Mitte):** 10-Abschnitte-Format mit argumentativer Design-Logik
+- **Outputs (rechts):** DESIGN.md, DESIGN-DARK.md, preview.html, preview-dark.html, Style Guide PPTX
+
 ## Features
 
 ### 10-Abschnitte-Format
@@ -230,15 +116,17 @@ Die DESIGN.md folgt einem standardisierten Format mit 10 Abschnitten:
 ### Eigenstaendige DESIGN-DARK.md
 
 Dark Mode nicht als Appendix, sondern als vollstaendig autarkes Dokument:
+
 - 4-stufiger Surface-Ladder (Canvas, Surface, Card, Elevated)
 - Text-Opacity-Hierarchie (100%/78%/50%/30%)
 - Border-Opacity-Hierarchie
 - Eigene Agent Prompts fuer Dark-Mode-Implementierung
-- Known Gaps inkl. Hinweis ob Dark Mode nativ oder abgeleitet ist
+- Known Gaps inkl. Hinweis, ob Dark Mode nativ oder abgeleitet ist
 
 ### Interaktive HTML-Previews als Mini-Websites
 
 Keine einfachen Farb-Kataloge, sondern echte Mini-Websites mit:
+
 - Sticky Nav mit Logo-Platzhalter und CTA-Button
 - Hero-Sektion mit Display-Headline und Button-Varianten
 - Farbpalette, Typografie-Skala, Button-Varianten
@@ -262,14 +150,17 @@ Jeweils als `preview.html` (Light) und `preview-dark.html` (Dark).
 ### Optionaler Style Guide als PPTX
 
 Nach der DESIGN.md-Generierung bietet der Skill einen Style Guide als PPTX an:
+
 - 6-8 Slides im Marken-Design (Farben, Schriften, Layout der analysierten Marke)
 - Cover, Inhaltsverzeichnis, Farbpalette, Typografie, Komponenten, Layout, Do's/Don'ts
 - Kein generisches Template — alles dynamisch aus der DESIGN.md erzeugt
-- Zusaetzliche Slides wenn Brand-Dokumente vorhanden sind (Brand Story, Tonalitaet)
+- Zusaetzliche Slides, wenn Brand-Dokumente vorhanden sind (Brand Story, Tonalitaet)
+
+**Das ist der Kern-Unterschied zu getdesign.md:** Der Skill liefert nicht nur ein Agenten-Briefing, sondern auch ein professionelles Kundendokument.
 
 ### Argumentativer Schreibstil
 
-Abschnitt 1 (Visual Theme) erklaert nicht nur WAS das Design tut, sondern WARUM. Jede Design-Entscheidung wird begruendet: "Pill-Buttons (1000px Radius) sind die einzige interaktive Form die das System committet — die weiche Rundung steht im bewussten Kontrast zu den harten Uppercase-Headlines."
+Abschnitt 1 (Visual Theme) erklaert nicht nur WAS das Design tut, sondern WARUM. Jede Design-Entscheidung wird begruendet: "Pill-Buttons (1000px Radius) sind die einzige interaktive Form, die das System committet — die weiche Rundung steht im bewussten Kontrast zu den harten Uppercase-Headlines."
 
 ### Page Rhythm als konkretes Pattern
 
@@ -282,9 +173,10 @@ Wenn die Website proprietaere Fonts nutzt, empfiehlt der Skill immer Open-Source
 
 ### Known Gaps fuer Transparenz
 
-Abschnitt 10 dokumentiert ehrlich was NICHT extrahiert werden konnte:
-- Proprietaere Fonts die nicht verfuegbar sind
-- Animationen/Transitions die nicht im statischen CSS sichtbar sind
+Abschnitt 10 dokumentiert ehrlich, was NICHT extrahiert werden konnte:
+
+- Proprietaere Fonts, die nicht verfuegbar sind
+- Animationen/Transitions, die nicht im statischen CSS sichtbar sind
 - Anzahl analysierter Seiten und welche Patterns evtl. fehlen
 - Fehlende Status-Farben oder Icon-Systeme
 
@@ -292,44 +184,37 @@ Abschnitt 10 dokumentiert ehrlich was NICHT extrahiert werden konnte:
 
 Vor dem Schreiben der Dateien fragt der Skill immer nach dem gewuenschten Speicherort (aktuelles Verzeichnis, bestimmter Ordner oder Desktop).
 
-## Hintergrund
+---
 
-Dieser Skill ist ein Reverse Engineering des kommerziellen Dienstes [getdesign.md](https://getdesign.md) ($39/Monat SaaS), der DESIGN.md-Dateien aus Websites generiert. Der Skill geht ueber den Funktionsumfang des Originals hinaus:
+## Hintergrund & Quellen
 
-- **Dark Mode als eigenstaendiges Dokument** — getdesign.md liefert nur Light Mode oder einen Appendix
-- **Style Guide PDF als Input** — offizielle Brand-Regeln fliessen in die Analyse ein
-- **Brand-Dokumente-Integration** — Brand Story, Archetypen und Tonalitaet bereichern das Ergebnis
-- **PPTX Style Guide als Output** — professionelles Kundendokument im Marken-Design
-- **Interaktive Mini-Website-Previews** — statt einfacher Farbkataloge
-- **Argumentativer Schreibstil** — erklaert Design-Entscheidungen, nicht nur Werte
-- **10 Abschnitte** statt 9 (Known Gaps als neuer Abschnitt fuer Transparenz)
+Dieser Skill ist ein **Reverse-Engineering des kommerziellen Dienstes [getdesign.md](https://getdesign.md/)**, der DESIGN.md-Dateien aus Websites generiert. Er uebernimmt das etablierte 10-Abschnitte-Format (minus die Known Gaps — die kommen hier dazu) und erweitert es um mehrere Dimensionen, die getdesign.md nicht bietet — allen voran den **automatisch generierten Style Guide als PPTX im Marken-Design**.
 
-## Trigger-Phrasen
+**Warum das ueberhaupt gebaut wurde:** DESIGN.md hat sich 2026 als De-facto-Standard fuer Agent-Briefings etabliert. Jeder, der mit Claude Design, Cursor, Lovable, v0 oder Claude Code ernsthaft arbeitet, braucht Design-Systeme in diesem Format. Wer mehr als eine Handvoll Analysen im Monat macht, rechnet das SaaS-Abo schnell nicht mehr heim — und wer mit sensiblen Kunden-Websites arbeitet, will keine Cloud-Uploads. Dieser Skill loest beides.
 
-- `/design-md-generator`
-- "extrahiere das Design von..."
-- "DESIGN.md fuer..."
-- "design system aus website"
+**Quellen und Grundlagen:**
 
-## Schnittstellen zu anderen Skills
+- [getdesign.md](https://getdesign.md/) — methodische Grundlage (10-Abschnitte-Format)
+- [defuddle CLI](https://github.com/kepano/defuddle) — CSS-Extraktion aus Websites
+- Claude Code PDF/DOCX/PPTX-Skills — Style-Guide-Ingestion
+- Eigene Erweiterung: Surface-Ladder, Text-Opacity-Hierarchie, PPTX-Style-Guide
 
-| Upstream | Was geliefert wird | Downstream | Was wir liefern |
-|----------|--------------------|------------|------------------|
-| Website-URL | Live-CSS + Screenshots | KI-Agenten | Copy-Paste Brand-Prompts |
-| Style Guide PDF/PPTX | Offizielle Brand-Regeln | Designer | Visuelle Komponenten-Referenz |
-| CI-Profil JSON | Bereits extrahierte Farben/Fonts | Marketing | Kundenfertiger Style-Guide PPTX |
-| Brand-Docs | Persoenlichkeit, Stimme, Bildsprache | `visualize` / Front-End-Builds | Design-System Single Source of Truth |
+---
 
 ## Dateistruktur
 
 ```
 design-md-generator/
-├── README.md                              ← Diese Datei
-├── SKILL.md                               ← Skill-Definition und Workflow
+├── README.md                              <- Diese Datei (DE)
+├── README.en.md                           <- Englische Version
+├── SKILL.md                               <- Skill-Definition und Workflow (DE)
+├── SKILL.en.md                            <- Skill-Definition (EN)
+├── overview.excalidraw                    <- Uebersichts-Diagramm (editierbar)
+├── overview.png                           <- Uebersichts-Diagramm (Rendering)
 └── references/
-    ├── design-md-format.md                ← DESIGN.md Format-Referenz
-    ├── preview-template.html              ← HTML-Preview-Template (Light)
-    └── preview-dark-template.html         ← HTML-Preview-Template (Dark)
+    ├── design-md-format.md                <- DESIGN.md Format-Referenz
+    ├── preview-template.html              <- HTML-Preview-Template (Light)
+    └── preview-dark-template.html         <- HTML-Preview-Template (Dark)
 ```
 
 ## Generierte Ausgabe-Dateien
